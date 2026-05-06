@@ -1,8 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script>window.coiServiceWorkerPath = "../coi-serviceworker.js";</script>
-    <script src="../coi-serviceworker.js"></script>
+    <script>
+      if (!self.crossOriginIsolated && "serviceWorker" in navigator) {
+        navigator.serviceWorker.addEventListener("controllerchange", function() {
+          if (!sessionStorage.getItem("coi-reloaded")) {
+            sessionStorage.setItem("coi-reloaded", "1");
+            location.reload();
+          }
+        });
+      } else {
+        sessionStorage.removeItem("coi-reloaded");
+      }
+    </script>
     <title>CourseKata Notebook</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
