@@ -1679,6 +1679,20 @@ const notebookPlugin = {
         tracker.widgetAdded.connect(async (_, panel) => {
             ck_log('[widgetAdded]', panel.context.path, 'dirty=', panel.context.model.dirty);
             await panel.context.ready;
+            const _toolbar = panel.node.querySelector('.jp-NotebookPanel-toolbar');
+            if (_toolbar) {
+                let _resizePending = false;
+                new MutationObserver(mutations => {
+                    if (_resizePending) return;
+                    for (const m of mutations) {
+                        if (m.target instanceof HTMLElement && m.target.classList.contains('jp-Toolbar-item') && m.target.style.display === 'none') {
+                            _resizePending = true;
+                            requestAnimationFrame(() => { window.dispatchEvent(new Event('resize')); _resizePending = false; });
+                            break;
+                        }
+                    }
+                }).observe(_toolbar, { attributes: true, attributeFilter: ['style'], subtree: true });
+            }
             const _initialCells = JSON.stringify(panel.context.model.toJSON().cells ?? []);
             panel.context.model.dirty = false;
             panel.context.model.stateChanged.connect(() => {
