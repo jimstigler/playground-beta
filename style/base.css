@@ -1,0 +1,736 @@
+/* stylelint-disable no-descending-specificity */
+
+/*
+    See the JupyterLab Developer Guide for useful CSS Patterns:
+
+    https://jupyterlab.readthedocs.io/en/stable/developer/css.html
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+#jp-menu-panel,
+#jp-top-bar,
+#jp-top-panel,
+.jp-LabShell[data-shell-mode='single-document'] #jp-menu-panel,
+.jp-LabShell[data-shell-mode='single-document'] #jp-top-bar {
+  min-height: 0;
+  display: none;
+}
+
+:root {
+  --je-scale: 0.74;
+  --je-slate-blue: #412c88;
+  --je-round-corners: 0px;
+  --je-round-corners-filetiles: 4px;
+  --je-font-family: 'Inter', sans-serif;
+  --je-dialog-round-corners: 6px;
+  --je-cell-height: 34px;
+  --je-toastify-z-index: calc(var(--toastify-z-index) + 2);
+  --je-document-padding: calc(var(--je-scale) * 42px);
+  --je-toolbar-height: calc(var(--je-scale) * 56px);
+  --je-margin-below-toolbar: calc(var(--je-scale) * 10px);
+  --je-lilac: #fff;
+  --je-border-color: #d7d7d7;
+  --je-slate-blue-gradient:
+    linear-gradient(90deg, rgb(0 0 0 / 0%) 0%, rgb(0 0 0 / 20%) 100%), #4b3187;
+}
+
+.jp-Dialog-content {
+  border: 1px solid var(--je-slate-blue);
+  border-radius: var(--je-dialog-round-corners);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+  font-family: var(--je-font-family);
+}
+
+.jp-Dialog-body {
+  color: var(--je-slate-blue);
+  font-family: var(--je-font-family);
+  font-size: calc(var(--je-scale) * 16px);
+  line-height: 1.45;
+}
+
+.jp-Dialog-footer {
+  justify-content: center;
+}
+
+.jp-Dialog-footerButtons {
+  text-align: center;
+  cursor: pointer;
+}
+
+.jp-Dialog {
+  clip-path: rect(
+    calc(var(--je-document-padding) + var(--je-toolbar-height) + var(--je-margin-below-toolbar))
+      calc(100% - var(--je-document-padding)) calc(100% - var(--je-document-padding))
+      var(--je-document-padding) round var(--je-dialog-round-corners)
+  );
+}
+
+.jp-Dialog-content .jp-Dialog-button {
+  background: var(--je-slate-blue) !important;
+  box-shadow: none;
+  border-radius: 4px;
+  font-family: var(--je-font-family);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 150%;
+  cursor: pointer;
+}
+
+.jp-Dialog-header {
+  color: var(--je-slate-blue);
+  font-family: var(--je-font-family);
+  font-weight: 600;
+  text-align: center;
+  justify-content: center;
+}
+
+.jp-toastContainer {
+  z-index: var(--je-toastify-z-index);
+}
+
+.jp-InputArea-prompt-indicator {
+  left: 0;
+  line-height: 25px;
+}
+
+.jp-InputArea-prompt-indicator::before {
+  left: 0;
+  line-height: 25px;
+  top: 5px;
+}
+
+.jp-InputArea-prompt-run.je-cell-run-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%) scale(1.15) !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s ease-in-out;
+  color: #fe5b7d !important;
+}
+
+.jp-RawCell .jp-InputArea-prompt-run.je-cell-run-button {
+  display: none;
+}
+
+.jp-Cell.jp-mod-active:not(.jp-RawCell) .jp-InputArea-prompt-run.je-cell-run-button {
+  opacity: 1 !important;
+}
+
+.jp-InputArea-prompt-run.je-cell-run-button circle {
+  fill: #fe5b7d !important;
+}
+
+.jp-InputArea-prompt-run.je-cell-run-button:hover circle {
+  fill: #e24f6e !important;
+}
+
+.jp-InputArea-prompt-run.je-cell-run-button svg,
+.jp-InputArea-prompt-run.je-cell-run-button svg *,
+.jp-InputArea-prompt-run.je-cell-run-button .jp-Icon,
+.jp-InputArea-prompt-run.je-cell-run-button .jp-Icon * {
+  fill: #fe5b7d !important;
+  stroke: #fe5b7d !important;
+}
+
+.jp-InputArea-prompt-run.je-cell-run-button:hover,
+.jp-InputArea-prompt-run.je-cell-run-button:hover svg,
+.jp-InputArea-prompt-run.je-cell-run-button:hover svg *,
+.jp-InputArea-prompt-run.je-cell-run-button:hover .jp-Icon,
+.jp-InputArea-prompt-run.je-cell-run-button:hover .jp-Icon * {
+  fill: #e24f6e !important;
+  stroke: #e24f6e !important;
+}
+
+/* Hide all dirty state indicators */
+.jp-Cell.jp-mod-dirty .jp-Cell-inputCollapser,
+.jp-InputCollapser.jp-Cell-inputCollapser,
+.jp-OutputCollapser.jp-Cell-outputCollapser,
+.jp-Collapser-child {
+  display: none;
+}
+
+.jp-Notebook .jp-CodeCell:hover .jp-InputArea-prompt-indicator,
+.jp-Notebook .jp-CodeCell.jp-mod-active .jp-InputArea-prompt-indicator,
+.jp-Notebook .jp-CodeCell.jp-mod-selected .jp-InputArea-prompt-indicator,
+.jp-Notebook .jp-CodeCell:hover .jp-InputPrompt > .jp-InputArea-prompt-indicator,
+.jp-Notebook .jp-CodeCell.jp-mod-active .jp-InputPrompt > .jp-InputArea-prompt-indicator,
+.jp-Notebook .jp-CodeCell.jp-mod-selected .jp-InputPrompt > .jp-InputArea-prompt-indicator {
+  visibility: hidden;
+}
+
+.jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
+  visibility: hidden;
+}
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-OutputPrompt {
+  visibility: visible;
+}
+
+.jp-Cell.jp-mod-dirty::before {
+  display: none;
+}
+
+.jp-Cell.jp-mod-dirty .jp-InputArea::before {
+  display: none;
+}
+
+/* Hide the • (U+2022) character for dirty cells */
+.jp-Cell.jp-mod-dirty .jp-InputPrompt.jp-InputArea-prompt::before {
+  content: '';
+}
+
+.jp-InputArea {
+  position: relative;
+}
+
+.jp-InputArea-editor {
+  border-radius: 0;
+  padding: calc(var(--je-scale) * 4px);
+}
+
+/* Ensure markdown and raw cells have a height that's
+consistent with code cells */
+.jp-MarkdownCell .jp-InputArea,
+.jp-RawCell .jp-InputArea {
+  min-height: var(--je-cell-height);
+}
+
+.jp-CodeCell .jp-Cell-inputWrapper {
+  min-height: var(--je-cell-height);
+}
+
+.jp-mod-focused .cm-placeholder {
+  visibility: hidden;
+}
+
+.cm-editor .cm-placeholder {
+  color: #828282 !important;
+  font-weight: 600;
+}
+
+.jp-MarkdownCell .jp-RenderedHTMLCommon,
+.jp-MarkdownCell .jp-InputArea-editor {
+  min-height: 32px;
+  align-items: center;
+}
+
+/* ------------------------------------------------------------------ */
+
+/* Toolbars: base styles, then JE overrides                           */
+
+/* ------------------------------------------------------------------ */
+
+.jp-Toolbar {
+  --jp-ui-font-color1: var(--je-slate-blue);
+  --jp-ui-font-family: var(--je-font-family);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px !important;
+}
+
+.jp-Toolbar-item {
+  margin-right: 6px !important;
+}
+
+.jp-ToolbarButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+}
+
+.jp-ToolbarButton svg {
+  width: 16px;
+  height: 16px;
+  stroke: #412c88;
+  fill: none;
+}
+
+.jp-ToolbarButtonComponent {
+  border-radius: 0 !important;
+  padding: 2px 4px !important;
+}
+
+.jp-ToolbarButtonComponent svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.jp-ToolbarButtonComponent-label {
+  font-weight: 600;
+  font-size: 16px !important;
+}
+
+.jp-ToolbarButtonComponent-label span:first-child {
+  color: #fe5b7d;
+}
+
+.jp-ToolbarButtonComponent-label:has(> span) span:first-child {
+  color: #fe5b7d !important;
+}
+
+jp-button[aria-label='Download'] svg {
+  width: 16px !important;
+  height: 16px !important;
+  fill: #412c88 !important;
+  stroke: #412c88 !important;
+}
+
+.je-KernelSwitcherButton.jp-ToolbarButtonComponent::part(content) {
+  gap: 4px;
+  flex-direction: row-reverse;
+}
+
+.jp-cell-toolbar .jp-ToolbarButtonComponent {
+  padding: calc(var(--je-scale) * 3px);
+}
+
+.jp-cell-toolbar .jp-ToolbarButtonComponent > svg {
+  min-height: 21px;
+  min-width: 18px;
+}
+
+/* Main area widget: full-width toolbar band */
+.jp-MainAreaWidget > .jp-Toolbar {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 6px 14px !important;
+  margin: 0 0 10px !important;
+  border-radius: 0 !important;
+  background: #f3f3f3 !important;
+  border-top: 1px solid #e0e0e0 !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  box-shadow: none !important;
+}
+
+.jp-MainAreaWidget > .jp-Toolbar .jp-Toolbar-item {
+  margin-right: 8px !important;
+}
+
+.jp-MainAreaWidget > .jp-Toolbar .jp-ToolbarButtonComponent-label {
+  font-size: 18px !important;
+  font-weight: 600;
+}
+
+.jp-MainAreaWidget > .jp-Toolbar .jp-ToolbarButtonComponent > svg {
+  height: initial;
+  width: initial;
+  scale: 0.62 !important;
+}
+
+.jp-MainAreaWidget > :not(.jp-Toolbar) {
+  border-radius: 0;
+  margin-top: var(--je-margin-below-toolbar);
+  background: white;
+}
+
+.jp-Notebook {
+  --jp-code-font-size: calc(var(--je-scale) * 16px);
+  --jp-cell-editor-background: #fff;
+  --jp-cell-editor-border-color: #cfcfcf;
+  --jp-border-width: calc(var(--je-scale) * 1px);
+}
+
+.jp-Cell,
+.jp-CodeCell .jp-Cell-inputWrapper,
+.jp-MarkdownCell .jp-InputArea,
+.jp-RawCell .jp-InputArea {
+  border-radius: 0 !important;
+}
+
+/* ------------------------------------------------------------------ */
+
+/* Notebook panel toolbar: CourseKata logo and tool cluster           */
+
+/* ------------------------------------------------------------------ */
+
+.jp-NotebookPanel-toolbar {
+  display: flex;
+  align-items: center;
+}
+
+.ck-logo-button {
+  width: 110px;
+  height: 28px;
+  margin-right: 16px;
+  margin-left: 2px;
+  flex: 0 0 auto;
+}
+
+.ck-logo-button a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: url('./icons/coursekata-logo.svg') no-repeat center left;
+  background-size: contain;
+}
+
+.jp-NotebookPanel-toolbar .jp-Toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.jp-NotebookPanel-toolbar .jp-Toolbar-item {
+  margin-right: 4px;
+}
+
+.jp-NotebookPanel-toolbar .jp-ToolbarButtonComponent {
+  padding: 1px 2px !important;
+}
+
+.jp-NotebookPanel-toolbar .jp-ToolbarButtonComponent-label {
+  font-size: 14px !important;
+}
+
+.jp-NotebookPanel-toolbar .jp-ToolbarButtonComponent > svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.jp-NotebookPanel-toolbar jp-button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+/* Per-tool icon sizing */
+.jp-NotebookPanel-toolbar [data-jp-item-name='run'] svg {
+  width: 14px !important;
+  height: 18px !important;
+}
+
+.jp-NotebookPanel-toolbar [data-jp-item-name='interrupt'] svg,
+.jp-NotebookPanel-toolbar [data-jp-item-name='restart'] svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.jp-NotebookPanel-toolbar [data-jp-item-name='jeKernelSwitcher'] svg {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* Color the + icons CourseKata red */
+.jp-NotebookPanel-toolbar [data-jp-item-name='insert'] svg[data-icon='ui-components:add'] path,
+.jp-NotebookPanel-toolbar
+  [data-jp-item-name='insert-text']
+  svg[data-icon='ui-components:add']
+  path {
+  stroke: #fe5b7d !important;
+}
+
+/* Hide tools we don't use */
+.jp-NotebookPanel-toolbar [data-jp-item-name='restart-and-run'],
+.jp-NotebookPanel-toolbar [data-jp-item-name='kernelStatus'] {
+  display: none !important;
+}
+
+/* Replace Download text+icon with a simple custom icon */
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] .jp-ToolbarButtonComponent-label {
+  display: none !important;
+}
+
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] .jp-ToolbarButtonComponent > svg {
+  display: none !important;
+}
+
+.jp-NotebookPanel-toolbar
+  [data-jp-item-name='downloadDropdown']
+  jp-button.jp-ToolbarButtonComponent::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: url('./icons/download-simple.svg') no-repeat center;
+  background-size: contain;
+  vertical-align: middle;
+  position: relative;
+  top: 3px;
+}
+
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] jp-button {
+  --focus-stroke-outer: transparent !important;
+  --focus-stroke-inner: transparent !important;
+}
+
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] jp-button::part(control) {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] .jp-ToolbarButtonComponent:focus,
+.jp-NotebookPanel-toolbar
+  [data-jp-item-name='downloadDropdown']
+  .jp-ToolbarButtonComponent:focus-visible,
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] jp-button:focus,
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] jp-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.jp-NotebookPanel-toolbar [data-jp-item-name='downloadDropdown'] jp-button:focus::part(control),
+.jp-NotebookPanel-toolbar
+  [data-jp-item-name='downloadDropdown']
+  jp-button:focus-visible::part(control),
+.jp-NotebookPanel-toolbar
+  [data-jp-item-name='downloadDropdown']
+  jp-button[focus-visible]::part(control) {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+#jp-main-dock-panel[data-mode='single-document'] {
+  padding: var(--je-document-padding) !important;
+  background: var(--je-lilac);
+}
+
+#jp-main-dock-panel[data-mode='single-document'] .jp-MainAreaWidget {
+  border-radius: 0;
+  background: transparent;
+}
+
+.je-NotFound {
+  height: 100%;
+  width: 100%;
+  background: white;
+  border-radius: 0;
+}
+
+.je-NotFound-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.je-NotFound-content {
+  font-family: var(--je-font-family);
+  color: var(--je-slate-blue);
+}
+
+.je-NotFound-code {
+  opacity: 0.5;
+  margin-bottom: 12px;
+  font-size: 48px;
+  color: var(--je-slate-blue);
+}
+
+.je-NotFound-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: var(--je-slate-blue);
+}
+
+.je-NotFound-message {
+  margin: 0;
+  opacity: 0.8;
+  color: var(--je-slate-blue);
+}
+
+/* ------------------------------------------------------------------ */
+
+/* Kernel indicator                                                   */
+
+/* ------------------------------------------------------------------ */
+
+.ck-KernelIndicator {
+  font-weight: 600;
+  padding: 0 6px;
+  font-size: 14px;
+}
+
+.ck-kernel-starting {
+  color: #7a7a7a;
+  animation: ck-kernel-pulse 1.2s ease-in-out infinite;
+}
+
+.ck-kernel-ready {
+  color: #16a34a;
+}
+
+@keyframes ck-kernel-pulse {
+  0% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.45;
+  }
+}
+
+/* GitHub file browser dialog */
+
+.je-GitHubBrowser {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 460px;
+  padding: 4px 0;
+  font-family: var(--je-font-family);
+}
+
+.je-GitHubBrowser-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.je-GitHubBrowser-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: var(--je-font-family);
+  border: 1px solid var(--je-border-color);
+  border-radius: 4px;
+  outline: none;
+}
+
+.je-GitHubBrowser-input:focus {
+  border-color: var(--je-slate-blue);
+}
+
+.je-GitHubBrowser-browse-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: var(--je-font-family);
+  background: var(--je-slate-blue);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.je-GitHubBrowser-browse-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.je-GitHubBrowser-recent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.je-GitHubBrowser-recent-label {
+  color: #888;
+  flex-shrink: 0;
+}
+
+.je-GitHubBrowser-recent-item {
+  cursor: pointer;
+  color: var(--je-slate-blue);
+  text-decoration: underline;
+}
+
+.je-GitHubBrowser-recent-item:hover {
+  opacity: 0.75;
+}
+
+.je-GitHubBrowser-breadcrumb {
+  font-size: 12px;
+  color: #666;
+  padding: 2px 0;
+}
+
+.je-GitHubBrowser-sep {
+  color: #aaa;
+}
+
+.je-GitHubBrowser-repo-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.je-GitHubBrowser-crumb {
+  cursor: pointer;
+  color: var(--je-slate-blue);
+  text-decoration: underline;
+}
+
+.je-GitHubBrowser-crumb:hover {
+  opacity: 0.75;
+}
+
+.je-GitHubBrowser-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--je-border-color);
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.je-GitHubBrowser-item {
+  padding: 7px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.je-GitHubBrowser-item:last-child {
+  border-bottom: none;
+}
+
+.je-GitHubBrowser-item:hover {
+  background: #f5f3ff;
+}
+
+.je-GitHubBrowser-item--selected {
+  background: #ede9fe;
+  font-weight: 500;
+}
+
+.je-GitHubBrowser-item--dir {
+  color: var(--je-slate-blue);
+  font-weight: 500;
+}
+
+.je-GitHubBrowser-item--file {
+  color: #333;
+}
+
+.je-GitHubBrowser-message {
+  padding: 16px 12px;
+  color: #888;
+  text-align: center;
+  font-size: 13px;
+}
+
+.je-GitHubBrowser-error {
+  padding: 12px;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+/* Checkmark for the currently-open notebook in the File menu recents list */
+.lm-Menu-item.lm-mod-toggled > .lm-Menu-itemIcon {
+  position: relative;
+}
+
+.lm-Menu-item.lm-mod-toggled > .lm-Menu-itemIcon::after {
+  content: '✓';
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--je-slate-blue, #5c8ede);
+  text-align: center;
+  line-height: 1;
+}

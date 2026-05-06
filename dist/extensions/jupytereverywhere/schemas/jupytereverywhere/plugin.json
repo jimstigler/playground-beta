@@ -1,0 +1,119 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "jupytereverywhere",
+  "description": "Settings for Jupyter Everywhere",
+  "type": "object",
+  "additionalProperties": false,
+  "jupyter.lab.toolbars": {
+    "Notebook": [
+      {
+        "name": "coursekataLogo",
+        "rank": 0
+      },
+      {
+        "name": "save",
+        "rank": 10
+      },
+      {
+        "name": "insert",
+        "command": "notebook:insert-cell-below",
+        "caption": "Insert Code Cell",
+        "rank": 12,
+        "label": "Code"
+      },
+      {
+        "name": "cut",
+        "command": "notebook:cut-cell",
+        "disabled": true
+      },
+      {
+        "name": "copy",
+        "command": "notebook:copy-cell",
+        "disabled": true
+      },
+      {
+        "name": "paste",
+        "command": "notebook:paste-cell-below",
+        "disabled": true
+      },
+      {
+        "name": "run",
+        "caption": "Run cell"
+      },
+      {
+        "name": "interrupt",
+        "caption": "Interrupt notebook"
+      },
+      {
+        "name": "restart",
+        "command": "notebook:restart-kernel",
+        "caption": "Restart notebook",
+        "label": ""
+      },
+      {
+        "name": "restart-and-run",
+        "caption": "Restart and run all cells",
+        "command": "jupytereverywhere:restart-and-run-all"
+      },
+      { "name": "spacer", "type": "spacer", "rank": 1 },
+      {
+        "name": "jeKernelSwitcher",
+        "rank": 38
+      },
+      {
+        "name": "cellType",
+        "command": "",
+        "disabled": true
+      },
+      {
+        "name": "executionProgress",
+        "command": "",
+        "disabled": true
+      },
+      {
+        "name": "kernelName",
+        "args": {},
+        "command": "",
+        "disabled": true,
+        "rank": 1000
+      },
+      {
+        "name": "insert-text",
+        "command": "apputils:run-all-enabled",
+        "args": {
+          "commands": ["notebook:insert-cell-below", "notebook:change-cell-to-markdown"],
+          "args": {
+            "toolbar": true
+          }
+        },
+        "rank": 13,
+        "icon": "ui-components:add",
+        "label": "Text"
+      },
+      {
+        "name": "upload",
+        "command": "",
+        "rank": 5,
+        "icon": "ui-components:file-upload"
+      }
+    ],
+    "Cell": [
+      {
+        "name": "insert-cell-above",
+        "disabled": true
+      },
+      {
+        "name": "insert-cell-below",
+        "disabled": true
+      }
+    ]
+  },
+  "jupyter.lab.transform": true,
+  "properties": {
+    "toolbar": {
+      "title": "Notebook panel toolbar items",
+      "type": "array",
+      "default": []
+    }
+  }
+}

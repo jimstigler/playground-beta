@@ -1,0 +1,84 @@
+name: Build the jupyterlite app
+
+inputs:
+  mode:
+    description: '"test" or "prod"'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+      with:
+        python-version: '3.11'
+
+    - name: Install micromamba
+      uses: mamba-org/setup-micromamba@b09ef9b599704322748535812ca03efb2625677b # v2.0.5
+
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      with:
+        name: extension-artifacts
+
+    - name: Install the dependencies
+      shell: bash
+      run: |
+        cd lite
+        pip install -r requirements.txt
+
+    - name: Install Jupyter Everywhere extension
+      shell: bash
+      run: |
+        pip install jupytereverywhere*.whl
+
+    - name: Install jlpm
+      shell: bash
+      run: |
+        set -eux
+        python -m pip install "jupyterlab==4.5.0a3"
+
+    - name: Build the JupyterLite app in ${{ inputs.mode }} mode
+      env:
+        MATRIX_MODE: ${{ inputs.mode }}
+      shell: bash
+      run: |
+        cd lite
+        if [[ "${MATRIX_MODE}" == "prod" ]]; then
+          echo "Building JupyterLite app in production mode"
+        else
+          echo "Building JupyterLite app in test mode"
+          bash ../ui-tests/inject-test-config.sh
+        fi
+        cd ..
+        jlpm install
+        jlpm build:all
+
+    - name: Upload artifact (${{ inputs.mode }})
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      with:
+        name: lite-app-${{ inputs.mode }}
+        path: ./dist
+        if-no-files-found: error
+
+    - name: Upload GitHub Pages artifact for production mode
+      if: inputs.mode == 'prod'
+      uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+      with:
+        path: ./dist
+
+    - name: Leave instructions for testing
+      if: inputs.mode == 'prod'
+      shell: bash
+      run: |
+        echo "### JupyterLite App is ready" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo 'To test it locally, download the `lite-app-prod` artifact and run' >> $GITHUB_STEP_SUMMARY
+        echo '```bash' >> $GITHUB_STEP_SUMMARY
+        echo "rm -r lite-app-prod" >> $GITHUB_STEP_SUMMARY
+        echo "unzip lite-app-prod.zip -d lite-app" >> $GITHUB_STEP_SUMMARY
+        echo "cd lite-app" >> $GITHUB_STEP_SUMMARY
+        echo "python -m http.server -b 127.0.0.1" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo 'And navigate to http://127.0.0.1:8000/' >> $GITHUB_STEP_SUMMARY
+        echo 'Press ctrl + c to stop the server.' >> $GITHUB_STEP_SUMMARY

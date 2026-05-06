@@ -1,0 +1,113 @@
+name: Update Playwright Snapshots
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  update-snapshots:
+    name: Update Playwright Snapshots
+    permissions:
+      contents: write
+      pull-requests: write
+    if: >
+      (
+        github.event.issue.author_association == 'OWNER' ||
+        github.event.issue.author_association == 'COLLABORATOR' ||
+        github.event.issue.author_association == 'MEMBER'
+      ) && github.event.issue.pull_request && contains(github.event.comment.body, 'please update snapshots')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: React to the triggering comment
+        run: |
+          gh api repos/$GITHUB_REPOSITORY/issues/comments/$GITHUB_EVENT_COMMENT_ID/reactions --raw-field 'content=+1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_COMMENT_ID: ${{ github.event.comment.id }}
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # zizmor: ignore[artipacked]
+
+      - name: Get PR Info
+        id: pr
+        env:
+          PR_NUMBER: ${{ github.event.issue.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          COMMENT_AT: ${{ github.event.comment.created_at }}
+        run: |
+          pr="$(gh api /repos/${GH_REPO}/pulls/${PR_NUMBER})"
+          head_sha="$(echo "$pr" | jq -r .head.sha)"
+          pushed_at="$(echo "$pr" | jq -r .pushed_at)"
+
+          if [[ $(date -d "$pushed_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+              echo "Updating is not allowed because the PR was pushed to (at $pushed_at) after the triggering comment was issued (at $COMMENT_AT)"
+              exit 1
+          fi
+
+          echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
+
+      - name: Checkout the branch from the PR that triggered the job
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: gh pr checkout $GITHUB_EVENT_ISSUE_NUMBER
+
+      - name: Validate the fetched branch HEAD revision
+        env:
+          EXPECTED_SHA: ${{ steps.pr.outputs.head_sha }}
+        run: |
+          actual_sha="$(git rev-parse HEAD)"
+
+          if [[ "$actual_sha" != "$EXPECTED_SHA" ]]; then
+              echo "The HEAD of the checked out branch ($actual_sha) differs from the HEAD commit available at the time when trigger comment was submitted ($EXPECTED_SHA)"
+              exit 1
+          fi
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@affc83be6020d529b9368cd4d63e467877606600 # v1
+
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@b09ef9b599704322748535812ca03efb2625677b # v2.0.5
+
+      - name: Install jlpm
+        run: python -m pip install -U "jupyterlab==4.5.0a3"
+
+      - name: Install the lite dependencies
+        run: |
+          cd lite
+          pip install -r requirements.txt
+
+      - name: Install extension
+        run: |
+          set -eux
+          python -m pip install .
+
+      - name: Build landing page and JupyterLite app
+        run: |
+          rm -rf dist dist-test
+          cd lite
+          bash ../ui-tests/inject-test-config.sh
+          cd ..
+          jlpm install
+          jlpm build:all
+
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@affc83be6020d529b9368cd4d63e467877606600 # v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Playwright knows how to start JupyterLab server
+          start_server_script: 'null'
+          test_folder: ui-tests
+          npm_client: jlpm
+          server_url: http-get://localhost:3000
+          browser: chromium
