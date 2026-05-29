@@ -402,6 +402,8 @@ jp-button[aria-label='Download'] svg {
 .jp-NotebookPanel-toolbar {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .ck-logo-button {

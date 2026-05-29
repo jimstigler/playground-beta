@@ -811,12 +811,15 @@ function showSavedToast(message = 'Changes saved') {
         'top:50%',
         'left:50%',
         'transform:translate(-50%,-50%)',
-        'background:rgba(65,44,136,0.88)',
-        'color:#fff',
-        'padding:12px 28px',
-        'border-radius:8px',
-        'font-size:15px',
+        'background:#f5f3ff',
+        'color:#412c88',
+        'border:2px solid #412c88',
+        'padding:18px 48px',
+        'border-radius:10px',
+        'font-size:16px',
+        'font-weight:600',
         'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+        'box-shadow:0 4px 20px rgba(0,0,0,0.12)',
         'z-index:10000',
         'pointer-events:none',
         'opacity:1',
@@ -2813,4 +2816,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.9e8a5784f73ea651095c.js.map
+//# sourceMappingURL=lib_index_js.0efaa351b89b1e31cd4b.js.map
