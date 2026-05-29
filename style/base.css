@@ -160,6 +160,10 @@
   white-space: pre;
 }
 
+.jp-Launcher {
+  display: none !important;
+}
+
 .jp-RawCell .jp-InputArea-prompt-run.je-cell-run-button {
   display: none;
 }
