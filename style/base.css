@@ -154,6 +154,11 @@
   to { transform: rotate(360deg); }
 }
 
+.jp-OutputArea-output pre {
+  overflow-x: auto;
+  white-space: pre;
+}
+
 .jp-RawCell .jp-InputArea-prompt-run.je-cell-run-button {
   display: none;
 }

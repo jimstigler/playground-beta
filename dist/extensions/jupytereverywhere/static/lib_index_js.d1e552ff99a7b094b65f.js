@@ -946,6 +946,7 @@ function patchXeusR(sessionContext) {
     if (kernel._ckAutoprintPatched)
         return;
     kernel._ckAutoprintPatched = true;
+    kernel.requestExecute({ code: 'options(width = 220)', silent: true });
     const orig = kernel.requestExecute.bind(kernel);
     kernel.requestExecute = (content, disposeOnDone, metadata) => {
         var _a;
@@ -2784,4 +2785,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.262bda3980788adb7517.js.map
+//# sourceMappingURL=lib_index_js.d1e552ff99a7b094b65f.js.map

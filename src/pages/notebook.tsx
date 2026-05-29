@@ -67,6 +67,8 @@ function patchXeusR(sessionContext: ISessionContext): void {
   if ((kernel as any)._ckAutoprintPatched) return;
   (kernel as any)._ckAutoprintPatched = true;
 
+  kernel.requestExecute({ code: 'options(width = 220)', silent: true });
+
   const orig = kernel.requestExecute.bind(kernel);
   (kernel as any).requestExecute = (
     content: Parameters<typeof orig>[0],
