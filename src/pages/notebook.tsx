@@ -923,8 +923,8 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(Commands.copyShareLink, {
-      label: 'Copy share link to GitHub version',
-      isEnabled: () => notebookSourceUrl !== null,
+      label: 'Copy link to GitHub source',
+      isEnabled: () => notebookSourceUrl !== null && !tracker.currentWidget?.context.model.dirty,
       execute: () => {
         if (!notebookSourceUrl) {
           return;
@@ -1047,7 +1047,7 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
           () => {
             void commands.execute(Commands.copyShareLink);
           },
-          () => notebookSourceUrl !== null,
+          () => notebookSourceUrl !== null && !tracker.currentWidget?.context.model.dirty,
           () => {
             void commands.execute(Commands.saveNotebookCommand);
           },

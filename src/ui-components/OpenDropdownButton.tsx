@@ -136,7 +136,7 @@ export class OpenDropdownButton extends ToolbarButton {
 
     if (!commands.hasCommand(commandCopyShareLink)) {
       commands.addCommand(commandCopyShareLink, {
-        label: 'Copy share link to GitHub version',
+        label: 'Copy link to GitHub source',
         isEnabled: () => isCopyShareLinkEnabled(),
         execute: () => {
           copyShareLink();

@@ -1779,8 +1779,8 @@ const notebookPlugin = {
             }
         });
         commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.copyShareLink, {
-            label: 'Copy share link to GitHub version',
-            isEnabled: () => notebookSourceUrl !== null,
+            label: 'Copy link to GitHub source',
+            isEnabled: () => { var _a; return notebookSourceUrl !== null && !((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); },
             execute: () => {
                 if (!notebookSourceUrl) {
                     return;
@@ -1879,7 +1879,7 @@ const notebookPlugin = {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.openFromGitHub);
         }, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.copyShareLink);
-        }, () => notebookSourceUrl !== null, () => {
+        }, () => { var _a; return notebookSourceUrl !== null && !((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveNotebookCommand);
         }, () => { var _a; return !!((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveToFile);
@@ -2578,7 +2578,7 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
         }
         if (!commands.hasCommand(commandCopyShareLink)) {
             commands.addCommand(commandCopyShareLink, {
-                label: 'Copy share link to GitHub version',
+                label: 'Copy link to GitHub source',
                 isEnabled: () => isCopyShareLinkEnabled(),
                 execute: () => {
                     copyShareLink();
@@ -2887,4 +2887,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.a5d579db3858a79556fa.js.map
+//# sourceMappingURL=lib_index_js.5eb6993be7769320b9be.js.map
