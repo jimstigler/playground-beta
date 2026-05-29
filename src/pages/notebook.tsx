@@ -12,6 +12,7 @@ import {
   ISessionContext,
   Notification,
   createToolbarFactory,
+  showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { Widget } from '@lumino/widgets';
@@ -45,6 +46,38 @@ function mapLanguageToKernel(content: INotebookContent): string {
     return 'xr';
   }
   return 'python';
+}
+
+function wrapRCodeForAutoprint(code: string): string {
+  // Use R raw strings so arbitrary user code is embedded without escaping.
+  // Find a delimiter suffix that doesn't collide with anything in the code.
+  let d = '';
+  while (code.includes(')' + d + '"')) d += '-';
+  const open = `r"${d}(`, close = `)${d}"`;
+  return (
+    `invisible(lapply(as.list(parse(text=${open}\n${code}\n${close})), ` +
+    `function(.ck_e) { .ck_r <- withVisible(eval(.ck_e, envir = .GlobalEnv)); ` +
+    `if (.ck_r$visible) print(.ck_r$value) }))`
+  );
+}
+
+function patchXeusR(sessionContext: ISessionContext): void {
+  const kernel = sessionContext.session?.kernel;
+  if (!kernel || !['xr', 'ir'].includes(kernel.name)) return;
+  if ((kernel as any)._ckAutoprintPatched) return;
+  (kernel as any)._ckAutoprintPatched = true;
+
+  const orig = kernel.requestExecute.bind(kernel);
+  (kernel as any).requestExecute = (
+    content: Parameters<typeof orig>[0],
+    disposeOnDone?: boolean,
+    metadata?: any
+  ) => {
+    if (!content.silent && content.store_history !== false && content.code?.trim()) {
+      content = { ...content, code: wrapRCodeForAutoprint(content.code) };
+    }
+    return orig(content, disposeOnDone, metadata);
+  };
 }
 
 async function patchPyodideHttp(sessionContext: ISessionContext): Promise<void> {
@@ -869,6 +902,8 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
         console.log('Removed kernel param from URL after kernel init.');
       }
 
+      panel.sessionContext.kernelChanged.connect(patchXeusR);
+      patchXeusR(panel.sessionContext);
       panel.sessionContext.kernelChanged.connect(patchPyodideHttp);
       await patchPyodideHttp(panel.sessionContext);
     });
