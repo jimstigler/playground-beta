@@ -906,6 +906,21 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
       patchXeusR(panel.sessionContext);
       panel.sessionContext.kernelChanged.connect(patchPyodideHttp);
       await patchPyodideHttp(panel.sessionContext);
+
+      // Spin the run button while the kernel is busy executing a cell.
+      // We snapshot the active cell's run button at the moment busy fires so
+      // we remove the class from the right button even if the user navigates
+      // away before execution finishes.
+      let _executingBtn: Element | null = null;
+      panel.sessionContext.statusChanged.connect((_, status) => {
+        if (status === 'busy') {
+          _executingBtn = panel.content.activeCell?.node.querySelector('.je-cell-run-button') ?? null;
+          _executingBtn?.classList.add('je-cell-running');
+        } else {
+          _executingBtn?.classList.remove('je-cell-running');
+          _executingBtn = null;
+        }
+      });
     });
 
     // Capture-phase beforeunload listener runs before JupyterLab's bubble-phase handler.

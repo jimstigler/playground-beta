@@ -1734,6 +1734,22 @@ const notebookPlugin = {
             patchXeusR(panel.sessionContext);
             panel.sessionContext.kernelChanged.connect(patchPyodideHttp);
             await patchPyodideHttp(panel.sessionContext);
+            // Spin the run button while the kernel is busy executing a cell.
+            // We snapshot the active cell's run button at the moment busy fires so
+            // we remove the class from the right button even if the user navigates
+            // away before execution finishes.
+            let _executingBtn = null;
+            panel.sessionContext.statusChanged.connect((_, status) => {
+                var _a, _b;
+                if (status === 'busy') {
+                    _executingBtn = (_b = (_a = panel.content.activeCell) === null || _a === void 0 ? void 0 : _a.node.querySelector('.je-cell-run-button')) !== null && _b !== void 0 ? _b : null;
+                    _executingBtn === null || _executingBtn === void 0 ? void 0 : _executingBtn.classList.add('je-cell-running');
+                }
+                else {
+                    _executingBtn === null || _executingBtn === void 0 ? void 0 : _executingBtn.classList.remove('je-cell-running');
+                    _executingBtn = null;
+                }
+            });
         });
         // Capture-phase beforeunload listener runs before JupyterLab's bubble-phase handler.
         // The xr kernel can set dirty=true asynchronously between our sync dirty-clear and
@@ -2768,4 +2784,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.cd36cc0bf1134e779bb3.js.map
+//# sourceMappingURL=lib_index_js.262bda3980788adb7517.js.map
