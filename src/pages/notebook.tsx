@@ -838,6 +838,61 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(Commands.clearStorage, {
+      label: 'Clear storage',
+      execute: async () => {
+        const dirtyPaths: string[] = [];
+        tracker.forEach(w => {
+          if (w.context.model.dirty) dirtyPaths.push(w.context.path);
+        });
+
+        const body = dirtyPaths.length > 0
+          ? `This will close all notebooks and delete all stored data from your browser. The following notebooks have unsaved changes that will be lost: "${dirtyPaths.join('", "')}".`
+          : 'This will close all notebooks and delete all stored data from your browser. This cannot be undone.';
+
+        const result = await showDialog({
+          title: 'Clear storage',
+          body,
+          buttons: [
+            Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
+            Dialog.okButton({ label: 'Clear storage', className: 'ck-btn' })
+          ]
+        });
+        if (!result.button.accept) return;
+
+        // Clear localStorage (notebook content + recents)
+        const lsKeys: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('uploaded-notebook') || k === 'jupytereverywhere:recent-notebooks')) {
+            lsKeys.push(k);
+          }
+        }
+        lsKeys.forEach(k => localStorage.removeItem(k));
+
+        // Clear sessionStorage (VFS caches + download history)
+        const ssKeys: string[] = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const k = sessionStorage.key(i);
+          if (k && (k.startsWith('vfs-cache:') || k.startsWith('ck-last-downloaded:') || k === 'ck-fsa-notice')) {
+            ssKeys.push(k);
+          }
+        }
+        ssKeys.forEach(k => sessionStorage.removeItem(k));
+
+        // Clear IndexedDB (file handles)
+        indexedDB.deleteDatabase('jupytereverywhere-fs');
+        setCurrentFileHandle(null);
+
+        _ckIntentionalNav = true;
+        tracker.forEach(w => { w.context.model.dirty = false; });
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        window.location.href = url.toString();
+      }
+    });
+
     commands.addCommand(Commands.openFromGitHub, {
       label: 'Open from GitHub',
       execute: async () => {
@@ -1002,6 +1057,9 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
           },
           () => {
             void commands.execute(Commands.closeNotebook);
+          },
+          () => {
+            void commands.execute(Commands.clearStorage);
           },
           () =>
             getRecentNotebooks().map(nb => ({

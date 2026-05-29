@@ -160,7 +160,7 @@ __webpack_require__.d(exports, {
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"lib_index_js":"9a0e5f233b97c57fc5bf","style_index_js":"53e61b476b277dd5a7fb","vendors-node_modules_jupyterlite_application_lib_index_js":"8de23fac4569e11d7bba","vendors-node_modules_jspdf_dist_jspdf_es_min_js":"aa26f92b879dcc9ec047","vendors-node_modules_html2canvas_dist_html2canvas_js":"9432abca2d7a2ae7175f","vendors-node_modules_dompurify_dist_purify_es_mjs":"6ea8a56c25123ec86f45","vendors-node_modules_canvg_lib_index_es_js":"209dc86e2a4479ffe80c"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"lib_index_js":"a5d579db3858a79556fa","style_index_js":"53e61b476b277dd5a7fb","vendors-node_modules_jupyterlite_application_lib_index_js":"8de23fac4569e11d7bba","vendors-node_modules_jspdf_dist_jspdf_es_min_js":"aa26f92b879dcc9ec047","vendors-node_modules_html2canvas_dist_html2canvas_js":"9432abca2d7a2ae7175f","vendors-node_modules_dompurify_dist_purify_es_mjs":"6ea8a56c25123ec86f45","vendors-node_modules_canvg_lib_index_es_js":"209dc86e2a4479ffe80c"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -631,4 +631,4 @@ __webpack_require__.d(exports, {
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=remoteEntry.78648e1a4c7d84185f1a.js.map
+//# sourceMappingURL=remoteEntry.b9d9d339308951c7596e.js.map

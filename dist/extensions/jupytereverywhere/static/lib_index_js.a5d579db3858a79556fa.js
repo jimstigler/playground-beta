@@ -24,6 +24,7 @@ var Commands;
     Commands.copyShareLink = 'jupytereverywhere:copy-share-link';
     Commands.saveToFile = 'jupytereverywhere:save-to-file';
     Commands.closeNotebook = 'jupytereverywhere:close-notebook';
+    Commands.clearStorage = 'jupytereverywhere:clear-storage';
 })(Commands || (Commands = {}));
 
 
@@ -1697,6 +1698,56 @@ const notebookPlugin = {
                 window.location.href = _blankUrl.toString();
             }
         });
+        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.clearStorage, {
+            label: 'Clear storage',
+            execute: async () => {
+                const dirtyPaths = [];
+                tracker.forEach(w => {
+                    if (w.context.model.dirty)
+                        dirtyPaths.push(w.context.path);
+                });
+                const body = dirtyPaths.length > 0
+                    ? `This will close all notebooks and delete all stored data from your browser. The following notebooks have unsaved changes that will be lost: "${dirtyPaths.join('", "')}".`
+                    : 'This will close all notebooks and delete all stored data from your browser. This cannot be undone.';
+                const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
+                    title: 'Clear storage',
+                    body,
+                    buttons: [
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Clear storage', className: 'ck-btn' })
+                    ]
+                });
+                if (!result.button.accept)
+                    return;
+                // Clear localStorage (notebook content + recents)
+                const lsKeys = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && (k.startsWith('uploaded-notebook') || k === 'jupytereverywhere:recent-notebooks')) {
+                        lsKeys.push(k);
+                    }
+                }
+                lsKeys.forEach(k => localStorage.removeItem(k));
+                // Clear sessionStorage (VFS caches + download history)
+                const ssKeys = [];
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const k = sessionStorage.key(i);
+                    if (k && (k.startsWith('vfs-cache:') || k.startsWith('ck-last-downloaded:') || k === 'ck-fsa-notice')) {
+                        ssKeys.push(k);
+                    }
+                }
+                ssKeys.forEach(k => sessionStorage.removeItem(k));
+                // Clear IndexedDB (file handles)
+                indexedDB.deleteDatabase('jupytereverywhere-fs');
+                (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.setCurrentFileHandle)(null);
+                _ckIntentionalNav = true;
+                tracker.forEach(w => { w.context.model.dirty = false; });
+                const url = new URL(window.location.href);
+                url.search = '';
+                url.hash = '';
+                window.location.href = url.toString();
+            }
+        });
         commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.openFromGitHub, {
             label: 'Open from GitHub',
             execute: async () => {
@@ -1834,6 +1885,8 @@ const notebookPlugin = {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveToFile);
         }, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.closeNotebook);
+        }, () => {
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.clearStorage);
         }, () => (0,_recents__WEBPACK_IMPORTED_MODULE_15__.getRecentNotebooks)().map(nb => ({
             label: nb.label,
             open: () => {
@@ -2421,7 +2474,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.ToolbarButton {
-    constructor(commands, openFromFile, openFromURL, openNewRNotebook, openNewPythonNotebook, downloadNotebook, downloadPDF, openFromGitHub, copyShareLink, isCopyShareLinkEnabled, saveChanges, isSaveChangesEnabled, saveAs, closeNotebook, getRecentItems) {
+    constructor(commands, openFromFile, openFromURL, openNewRNotebook, openNewPythonNotebook, downloadNotebook, downloadPDF, openFromGitHub, copyShareLink, isCopyShareLinkEnabled, saveChanges, isSaveChangesEnabled, saveAs, closeNotebook, clearStorage, getRecentItems) {
         const commandOpenFile = 'jupytereverywhere:file-open-from-file';
         const commandOpenUrl = 'jupytereverywhere:file-open-from-url';
         const commandNewR = 'jupytereverywhere:file-new-r-notebook';
@@ -2433,6 +2486,7 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
         const commandSaveChanges = 'jupytereverywhere:file-save-changes';
         const commandSaveAs = 'jupytereverywhere:file-save-as';
         const commandCloseNotebook = 'jupytereverywhere:file-close-notebook';
+        const commandClearStorage = 'jupytereverywhere:file-clear-storage';
         if (!commands.hasCommand(commandOpenFile)) {
             commands.addCommand(commandOpenFile, {
                 label: 'Open from file',
@@ -2514,6 +2568,14 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
                 }
             });
         }
+        if (!commands.hasCommand(commandClearStorage)) {
+            commands.addCommand(commandClearStorage, {
+                label: 'Clear storage',
+                execute: () => {
+                    clearStorage();
+                }
+            });
+        }
         if (!commands.hasCommand(commandCopyShareLink)) {
             commands.addCommand(commandCopyShareLink, {
                 label: 'Copy share link to GitHub version',
@@ -2566,6 +2628,8 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
                 menu.addItem({ command: commandCopyShareLink });
                 menu.addItem({ type: 'separator' });
                 menu.addItem({ command: commandCloseNotebook });
+                menu.addItem({ type: 'separator' });
+                menu.addItem({ command: commandClearStorage });
                 const anchor = this.node.getBoundingClientRect();
                 menu.open(anchor.left, anchor.bottom);
                 menu.aboutToClose.connect(() => {
@@ -2823,4 +2887,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.9a0e5f233b97c57fc5bf.js.map
+//# sourceMappingURL=lib_index_js.a5d579db3858a79556fa.js.map
