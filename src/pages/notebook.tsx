@@ -937,6 +937,10 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    tracker.currentChanged.connect(() => {
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    });
+
     tracker.widgetAdded.connect(async (_, panel) => {
       console.log('[widgetAdded]', panel.context.path, 'dirty=', panel.context.model.dirty);
       // Kernel init (xr in particular) fires spurious dirty events and also

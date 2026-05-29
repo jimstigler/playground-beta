@@ -1790,6 +1790,9 @@ const notebookPlugin = {
                 });
             }
         });
+        tracker.currentChanged.connect(() => {
+            requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+        });
         tracker.widgetAdded.connect(async (_, panel) => {
             var _a;
             console.log('[widgetAdded]', panel.context.path, 'dirty=', panel.context.model.dirty);
@@ -2884,4 +2887,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.90803545c1eabbe7fd57.js.map
+//# sourceMappingURL=lib_index_js.bd081163a6dfcad688ba.js.map
