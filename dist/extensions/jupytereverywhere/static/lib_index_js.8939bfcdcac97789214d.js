@@ -1792,7 +1792,7 @@ const notebookPlugin = {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.copyShareLink);
         }, () => notebookSourceUrl !== null, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveNotebookCommand);
-        }, () => { var _a; return !!(0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.getCurrentFileHandle)() && !!((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => {
+        }, () => { var _a; return !!((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveToFile);
         }, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.closeNotebook);
@@ -2785,4 +2785,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.d1e552ff99a7b094b65f.js.map
+//# sourceMappingURL=lib_index_js.8939bfcdcac97789214d.js.map

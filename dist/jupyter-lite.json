@@ -65,7 +65,7 @@
       },
       {
         "extension": "./extension",
-        "load": "static/remoteEntry.496a2ff3b7dac55a1a97.js",
+        "load": "static/remoteEntry.5c7f56c710141bd8bf16.js",
         "name": "jupytereverywhere",
         "style": "./style"
       },
