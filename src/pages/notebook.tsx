@@ -172,6 +172,13 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
 
     let notebookSourceUrl: string | null = null;
 
+    window.addEventListener('beforeunload', (e) => {
+      if (tracker.currentWidget?.context.model.dirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
     const fsaSupported = isFileSystemAccessSupported();
     if (!fsaSupported && !sessionStorage.getItem('ck-fsa-notice')) {
       sessionStorage.setItem('ck-fsa-notice', '1');

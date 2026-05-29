@@ -1055,6 +1055,13 @@ const notebookPlugin = {
         const uploadedNotebookId = params.get('uploaded-notebook');
         const fromUrl = params.get('from');
         let notebookSourceUrl = null;
+        window.addEventListener('beforeunload', (e) => {
+            var _a;
+            if ((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
         const fsaSupported = (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.isFileSystemAccessSupported)();
         if (!fsaSupported && !sessionStorage.getItem('ck-fsa-notice')) {
             sessionStorage.setItem('ck-fsa-notice', '1');
@@ -2816,4 +2823,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.0efaa351b89b1e31cd4b.js.map
+//# sourceMappingURL=lib_index_js.9a0e5f233b97c57fc5bf.js.map
