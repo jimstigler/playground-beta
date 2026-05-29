@@ -65,13 +65,13 @@
       },
       {
         "extension": "./extension",
-        "load": "static/remoteEntry.4c1bb1121b7e8e6fa3e6.js",
+        "load": "static/remoteEntry.2dd6062c8e7f210ee1b7.js",
         "name": "jupytereverywhere",
         "style": "./style"
       },
       {
         "extension": "./extension",
-        "load": "static/remoteEntry.2dd6062c8e7f210ee1b7.js",
+        "load": "static/remoteEntry.5cbb9d2323598fbda535.js",
         "name": "jupyterlab_pygments",
         "style": "./style"
       }
