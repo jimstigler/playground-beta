@@ -567,7 +567,7 @@ const plugin = {
                     try {
                         await (0,_filesystem__WEBPACK_IMPORTED_MODULE_9__.saveToHandle)(fileHandle, text);
                         await panel.context.save();
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.success('Saved.', { autoClose: 2000 });
+                        (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_10__.showSavedToast)();
                     }
                     catch (err) {
                         console.error('Failed to save to file handle:', err);
@@ -766,7 +766,8 @@ const notebookFactoryPlugin = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   generateDefaultNotebookName: () => (/* binding */ generateDefaultNotebookName),
-/* harmony export */   isNotebookEmpty: () => (/* binding */ isNotebookEmpty)
+/* harmony export */   isNotebookEmpty: () => (/* binding */ isNotebookEmpty),
+/* harmony export */   showSavedToast: () => (/* binding */ showSavedToast)
 /* harmony export */ });
 const toText = (src) => (Array.isArray(src) ? src.join('') : (src !== null && src !== void 0 ? src : ''));
 /**
@@ -801,6 +802,31 @@ function generateDefaultNotebookName() {
     const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
     const time = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
     return `Notebook_${date}_${time}`;
+}
+function showSavedToast(message = 'Changes saved') {
+    const el = document.createElement('div');
+    el.textContent = message;
+    el.style.cssText = [
+        'position:fixed',
+        'top:50%',
+        'left:50%',
+        'transform:translate(-50%,-50%)',
+        'background:rgba(65,44,136,0.88)',
+        'color:#fff',
+        'padding:12px 28px',
+        'border-radius:8px',
+        'font-size:15px',
+        'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+        'z-index:10000',
+        'pointer-events:none',
+        'opacity:1',
+        'transition:opacity 0.4s ease',
+    ].join(';');
+    document.body.appendChild(el);
+    setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 400);
+    }, 1500);
 }
 
 
@@ -901,6 +927,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _upload__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../upload */ "./lib/upload.js");
 /* harmony import */ var _filesystem__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../filesystem */ "./lib/filesystem.js");
 /* harmony import */ var _recents__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../recents */ "./lib/recents.js");
+/* harmony import */ var _notebook_utils__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../notebook-utils */ "./lib/notebook-utils.js");
+
 
 
 
@@ -1530,7 +1558,7 @@ const notebookPlugin = {
                     await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.storeRecentHandle)(recentKey, handle);
                     (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: handle.name, type: 'file', handleKey: recentKey });
                     await panel.context.save();
-                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Notification.success('Saved.', { autoClose: 2000 });
+                    (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_16__.showSavedToast)();
                 }
                 catch (err) {
                     console.error('Failed to save to file:', err);
@@ -2785,4 +2813,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.8939bfcdcac97789214d.js.map
+//# sourceMappingURL=lib_index_js.9e8a5784f73ea651095c.js.map

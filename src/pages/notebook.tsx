@@ -35,6 +35,7 @@ import {
   retrieveRecentHandle
 } from '../filesystem';
 import { RecentNotebook, addRecentNotebook, getRecentNotebooks, removeRecentNotebook } from '../recents';
+import { showSavedToast } from '../notebook-utils';
 
 function mapLanguageToKernel(content: INotebookContent): string {
   const rawLang =
@@ -707,7 +708,7 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
           await storeRecentHandle(recentKey, handle);
           addRecentNotebook({ label: handle.name, type: 'file', handleKey: recentKey });
           await panel.context.save();
-          Notification.success('Saved.', { autoClose: 2000 });
+          showSavedToast();
         } catch (err) {
           console.error('Failed to save to file:', err);
           Notification.warning('Could not save to file.', { autoClose: 4000 });
