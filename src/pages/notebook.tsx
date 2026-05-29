@@ -16,6 +16,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { Widget } from '@lumino/widgets';
+import { MessageLoop } from '@lumino/messaging';
 import { UUID } from '@lumino/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
@@ -937,8 +938,16 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    tracker.currentChanged.connect(() => {
-      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    tracker.currentChanged.connect((_, panel) => {
+      if (!panel) return;
+      requestAnimationFrame(() => {
+        const toolbar = panel.toolbar;
+        const w = toolbar.node.clientWidth;
+        const h = toolbar.node.clientHeight;
+        if (w > 0) {
+          MessageLoop.sendMessage(toolbar, new Widget.ResizeMessage(w, h));
+        }
+      });
     });
 
     tracker.widgetAdded.connect(async (_, panel) => {

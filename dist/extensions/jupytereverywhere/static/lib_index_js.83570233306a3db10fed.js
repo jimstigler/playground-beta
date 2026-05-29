@@ -920,18 +920,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__);
 /* harmony import */ var _lumino_widgets__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @lumino/widgets */ "webpack/sharing/consume/default/@lumino/widgets");
 /* harmony import */ var _lumino_widgets__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_lumino_widgets__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @lumino/coreutils */ "webpack/sharing/consume/default/@lumino/coreutils");
-/* harmony import */ var _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var _jupyterlab_settingregistry__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @jupyterlab/settingregistry */ "webpack/sharing/consume/default/@jupyterlab/settingregistry");
-/* harmony import */ var _jupyterlab_settingregistry__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_settingregistry__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var _jupyterlab_translation__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @jupyterlab/translation */ "webpack/sharing/consume/default/@jupyterlab/translation");
-/* harmony import */ var _jupyterlab_translation__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_translation__WEBPACK_IMPORTED_MODULE_10__);
-/* harmony import */ var _commands__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../commands */ "./lib/commands.js");
-/* harmony import */ var _kernels__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../kernels */ "./lib/kernels.js");
-/* harmony import */ var _upload__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../upload */ "./lib/upload.js");
-/* harmony import */ var _filesystem__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../filesystem */ "./lib/filesystem.js");
-/* harmony import */ var _recents__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../recents */ "./lib/recents.js");
-/* harmony import */ var _notebook_utils__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../notebook-utils */ "./lib/notebook-utils.js");
+/* harmony import */ var _lumino_messaging__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @lumino/messaging */ "webpack/sharing/consume/default/@lumino/messaging");
+/* harmony import */ var _lumino_messaging__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_lumino_messaging__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @lumino/coreutils */ "webpack/sharing/consume/default/@lumino/coreutils");
+/* harmony import */ var _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(_lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var _jupyterlab_settingregistry__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @jupyterlab/settingregistry */ "webpack/sharing/consume/default/@jupyterlab/settingregistry");
+/* harmony import */ var _jupyterlab_settingregistry__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_settingregistry__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var _jupyterlab_translation__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @jupyterlab/translation */ "webpack/sharing/consume/default/@jupyterlab/translation");
+/* harmony import */ var _jupyterlab_translation__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_translation__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var _commands__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../commands */ "./lib/commands.js");
+/* harmony import */ var _kernels__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../kernels */ "./lib/kernels.js");
+/* harmony import */ var _upload__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../upload */ "./lib/upload.js");
+/* harmony import */ var _filesystem__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../filesystem */ "./lib/filesystem.js");
+/* harmony import */ var _recents__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../recents */ "./lib/recents.js");
+/* harmony import */ var _notebook_utils__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../notebook-utils */ "./lib/notebook-utils.js");
+
 
 
 
@@ -1021,8 +1024,8 @@ const notebookPlugin = {
         _jupyterlab_notebook__WEBPACK_IMPORTED_MODULE_5__.INotebookTracker,
         _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.IToolbarWidgetRegistry,
         _jupyterlab_notebook__WEBPACK_IMPORTED_MODULE_5__.INotebookWidgetFactory,
-        _jupyterlab_settingregistry__WEBPACK_IMPORTED_MODULE_9__.ISettingRegistry,
-        _jupyterlab_translation__WEBPACK_IMPORTED_MODULE_10__.ITranslator
+        _jupyterlab_settingregistry__WEBPACK_IMPORTED_MODULE_10__.ISettingRegistry,
+        _jupyterlab_translation__WEBPACK_IMPORTED_MODULE_11__.ITranslator
     ],
     optional: [_jupyterlite_application__WEBPACK_IMPORTED_MODULE_4__.ILiteRouter],
     activate: (app, tracker, toolbarRegistry, notebookFactory, settingRegistry, translator, router) => {
@@ -1063,7 +1066,7 @@ const notebookPlugin = {
                 e.returnValue = '';
             }
         });
-        const fsaSupported = (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.isFileSystemAccessSupported)();
+        const fsaSupported = (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.isFileSystemAccessSupported)();
         if (!fsaSupported && !sessionStorage.getItem('ck-fsa-notice')) {
             sessionStorage.setItem('ck-fsa-notice', '1');
             setTimeout(() => {
@@ -1085,7 +1088,7 @@ const notebookPlugin = {
                 if (result.button.label === 'Cancel')
                     return;
                 if (result.button.accept) {
-                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveNotebookCommand);
+                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
                 }
             }
             if (!fsaSupported && currentWidget && currentWidget.context.model.dirty) {
@@ -1114,7 +1117,7 @@ const notebookPlugin = {
                             sessionStorage.setItem(`vfs-cache:${_fn}`, JSON.stringify(currentWidget.context.model.toJSON()));
                         }
                         catch (_a) { }
-                        (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
+                        (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
                     }
                 }
             }
@@ -1129,11 +1132,11 @@ const notebookPlugin = {
         };
         const createNewNotebook = async () => {
             notebookSourceUrl = null;
-            (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.setCurrentFileHandle)(null);
+            (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.setCurrentFileHandle)(null);
             try {
                 const currentParams = new URLSearchParams(window.location.search);
                 const desiredKernelParam = currentParams.get('kernel') || 'r';
-                const desiredKernel = _kernels__WEBPACK_IMPORTED_MODULE_12__.KERNEL_URL_TO_NAME[desiredKernelParam] || 'xr';
+                const desiredKernel = _kernels__WEBPACK_IMPORTED_MODULE_13__.KERNEL_URL_TO_NAME[desiredKernelParam] || 'xr';
                 await commands.execute('notebook:create-new', {
                     kernelName: desiredKernel
                 });
@@ -1158,7 +1161,7 @@ const notebookPlugin = {
                 const kernelName = mapLanguageToKernel(content);
                 content.metadata.kernelspec = {
                     name: kernelName,
-                    display_name: (_c = _kernels__WEBPACK_IMPORTED_MODULE_12__.KERNEL_DISPLAY_NAMES[kernelName]) !== null && _c !== void 0 ? _c : kernelName
+                    display_name: (_c = _kernels__WEBPACK_IMPORTED_MODULE_13__.KERNEL_DISPLAY_NAMES[kernelName]) !== null && _c !== void 0 ? _c : kernelName
                 };
                 // storedName is the actual filename from the user's disk (e.g. "jim_test.ipynb").
                 // Without it, local files get stored as Uploaded_<id>.ipynb in the virtual FS,
@@ -1186,8 +1189,8 @@ const notebookPlugin = {
                 currentUrl.searchParams.delete('uploaded-notebook');
                 window.history.replaceState({}, '', currentUrl.toString());
                 notebookSourceUrl = sourceUrl;
-                const fileHandle = await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.retrieveHandleForUpload)(id);
-                (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.setCurrentFileHandle)(fileHandle);
+                const fileHandle = await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.retrieveHandleForUpload)(id);
+                (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.setCurrentFileHandle)(fileHandle);
                 const fromCache = localStorage.getItem(`uploaded-notebook-from-cache:${id}`) === '1';
                 localStorage.removeItem(`uploaded-notebook-from-cache:${id}`);
                 if (!fileHandle && !sourceUrl) {
@@ -1195,7 +1198,7 @@ const notebookPlugin = {
                         sessionStorage.setItem(`vfs-cache:${filename}`, JSON.stringify(content));
                     }
                     catch ( /* ignore quota errors */_h) { /* ignore quota errors */ }
-                    (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: filename, type: 'vfs', path: filename });
+                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: filename, type: 'vfs', path: filename });
                 }
                 if (!fromCache) {
                     try {
@@ -1248,7 +1251,7 @@ const notebookPlugin = {
                     if (result.button.label === 'Cancel')
                         return;
                     if (result.button.accept) {
-                        await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveNotebookCommand);
+                        await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
                     }
                 }
                 if (!fsaSupported && currentWidget && currentWidget.context.model.dirty) {
@@ -1277,15 +1280,15 @@ const notebookPlugin = {
                                 sessionStorage.setItem(`vfs-cache:${_fn}`, JSON.stringify(currentWidget.context.model.toJSON()));
                             }
                             catch (_b) { }
-                            (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
+                            (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
                         }
                     }
                 }
-                (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: `GitHub: ${fileName}`, type: 'github', url: fetchUrl });
+                (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: `GitHub: ${fileName}`, type: 'github', url: fetchUrl });
                 flushVfsCaches();
                 _ckIntentionalNav = true;
                 tracker.forEach(w => { w.context.model.dirty = false; });
-                await (0,_upload__WEBPACK_IMPORTED_MODULE_13__.openNotebookContent)(parsed, fetchUrl);
+                await (0,_upload__WEBPACK_IMPORTED_MODULE_14__.openNotebookContent)(parsed, fetchUrl);
             }
             catch (error) {
                 console.error('Failed to open notebook from URL:', error);
@@ -1323,7 +1326,7 @@ const notebookPlugin = {
                 if (result.button.label === 'Cancel')
                     return;
                 if (result.button.accept) {
-                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveNotebookCommand);
+                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
                 }
             }
             if (!fsaSupported && currentWidget && currentWidget.context.model.dirty) {
@@ -1352,11 +1355,11 @@ const notebookPlugin = {
                             sessionStorage.setItem(`vfs-cache:${_fn}`, JSON.stringify(currentWidget.context.model.toJSON()));
                         }
                         catch (_a) { }
-                        (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
+                        (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
                     }
                 }
             }
-            if (!(0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.isFileSystemAccessSupported)()) {
+            if (!(0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.isFileSystemAccessSupported)()) {
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = '.ipynb,application/json';
@@ -1367,7 +1370,7 @@ const notebookPlugin = {
                         flushVfsCaches();
                         _ckIntentionalNav = true;
                         tracker.forEach(w => { w.context.model.dirty = false; });
-                        await (0,_upload__WEBPACK_IMPORTED_MODULE_13__.handleNotebookUpload)(file);
+                        await (0,_upload__WEBPACK_IMPORTED_MODULE_14__.handleNotebookUpload)(file);
                     }
                 };
                 input.click();
@@ -1375,7 +1378,7 @@ const notebookPlugin = {
             }
             let picked;
             try {
-                picked = await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.pickNotebookFile)();
+                picked = await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.pickNotebookFile)();
             }
             catch (err) {
                 await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showErrorMessage)('Failed to open file', err instanceof Error ? err.message : String(err));
@@ -1393,17 +1396,17 @@ const notebookPlugin = {
                 await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showErrorMessage)('Invalid notebook', 'The selected file is not a valid notebook.');
                 return;
             }
-            if (!(0,_upload__WEBPACK_IMPORTED_MODULE_13__.detectNotebookLanguage)(parsed)) {
+            if (!(0,_upload__WEBPACK_IMPORTED_MODULE_14__.detectNotebookLanguage)(parsed)) {
                 await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showErrorMessage)('Please open a valid notebook', 'Only Python and R notebooks are supported.');
                 return;
             }
-            const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
+            const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
             localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
             localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
-            await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.storeHandleForUpload)(uploadId, handle);
-            const recentKey = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
-            await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.storeRecentHandle)(recentKey, handle);
-            (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: handle.name, type: 'file', handleKey: recentKey });
+            await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.storeHandleForUpload)(uploadId, handle);
+            const recentKey = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
+            await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.storeRecentHandle)(recentKey, handle);
+            (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: handle.name, type: 'file', handleKey: recentKey });
             const target = new URL(window.location.href);
             target.search = '';
             target.searchParams.set('uploaded-notebook', uploadId);
@@ -1428,7 +1431,7 @@ const notebookPlugin = {
                 if (existingId) {
                     app.shell.activateById(existingId);
                     notebookSourceUrl = null;
-                    (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)(nb);
+                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)(nb);
                     return;
                 }
                 const cached = sessionStorage.getItem(`vfs-cache:${nb.path}`);
@@ -1436,11 +1439,11 @@ const notebookPlugin = {
                     _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Notification.warning('Could not reopen the notebook — try "Open from file" to upload it again.', { autoClose: 4000 });
                     return;
                 }
-                const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
+                const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
                 localStorage.setItem(`uploaded-notebook:${uploadId}`, cached);
                 localStorage.setItem(`uploaded-notebook-name:${uploadId}`, nb.path);
                 localStorage.setItem(`uploaded-notebook-from-cache:${uploadId}`, '1');
-                (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)(nb);
+                (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)(nb);
                 const target = new URL(window.location.href);
                 target.search = '';
                 target.searchParams.set('uploaded-notebook', uploadId);
@@ -1452,7 +1455,7 @@ const notebookPlugin = {
                 return;
             }
             if (nb.type === 'file' && nb.handleKey) {
-                const handle = await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.retrieveRecentHandle)(nb.handleKey);
+                const handle = await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.retrieveRecentHandle)(nb.handleKey);
                 if (!handle) {
                     _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Notification.warning('Could not find the saved file. Please use "Open from file" instead.', {
                         autoClose: 4000
@@ -1474,8 +1477,8 @@ const notebookPlugin = {
                         tracker.forEach(w => { w.context.model.dirty = false; });
                         app.shell.activateById(existingId);
                         notebookSourceUrl = null;
-                        (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.setCurrentFileHandle)(handle);
-                        (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)(nb);
+                        (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.setCurrentFileHandle)(handle);
+                        (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)(nb);
                         return;
                     }
                     // Slow path: need to read file from disk — only read permission required here;
@@ -1496,11 +1499,11 @@ const notebookPlugin = {
                     // context created by docmanager:open. The redirect flow avoids this entirely.
                     const diskFile = await handle.getFile();
                     const text = await diskFile.text();
-                    const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
+                    const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
                     localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
                     localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
-                    await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.storeHandleForUpload)(uploadId, handle);
-                    (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)(nb);
+                    await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.storeHandleForUpload)(uploadId, handle);
+                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)(nb);
                     const target = new URL(window.location.href);
                     target.search = '';
                     target.searchParams.set('uploaded-notebook', uploadId);
@@ -1523,7 +1526,7 @@ const notebookPlugin = {
                                 return;
                             }
                             if (result.button.label === 'Save') {
-                                await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveNotebookCommand);
+                                await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
                             }
                         }
                     }
@@ -1539,7 +1542,7 @@ const notebookPlugin = {
                 }
             }
         };
-        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveToFile, {
+        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveToFile, {
             label: 'Save as…',
             execute: async () => {
                 const panel = tracker.currentWidget;
@@ -1547,7 +1550,7 @@ const notebookPlugin = {
                     return;
                 }
                 if (!fsaSupported) {
-                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.downloadNotebookCommand);
+                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.downloadNotebookCommand);
                     return;
                 }
                 const content = panel.context.model.toJSON();
@@ -1558,19 +1561,19 @@ const notebookPlugin = {
                 if (notebookSourceUrl !== null) {
                     suggestedName = suggestedName.replace(/\.ipynb$/i, '_copy.ipynb');
                 }
-                const handle = await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.pickSaveLocation)(suggestedName);
+                const handle = await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.pickSaveLocation)(suggestedName);
                 if (!handle) {
                     return;
                 }
                 try {
-                    await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.saveToHandle)(handle, text);
-                    (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.setCurrentFileHandle)(handle);
+                    await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.saveToHandle)(handle, text);
+                    (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.setCurrentFileHandle)(handle);
                     notebookSourceUrl = null;
-                    const recentKey = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
-                    await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.storeRecentHandle)(recentKey, handle);
-                    (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: handle.name, type: 'file', handleKey: recentKey });
+                    const recentKey = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
+                    await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.storeRecentHandle)(recentKey, handle);
+                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: handle.name, type: 'file', handleKey: recentKey });
                     await panel.context.save();
-                    (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_16__.showSavedToast)();
+                    (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_17__.showSavedToast)();
                 }
                 catch (err) {
                     console.error('Failed to save to file:', err);
@@ -1578,7 +1581,7 @@ const notebookPlugin = {
                 }
             }
         });
-        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.closeNotebook, {
+        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.closeNotebook, {
             label: 'Close notebook',
             execute: async () => {
                 var _a;
@@ -1596,7 +1599,7 @@ const notebookPlugin = {
                     if (result.button.label === 'Cancel')
                         return;
                     if (result.button.accept) {
-                        await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveNotebookCommand);
+                        await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
                     }
                 }
                 if (!fsaSupported && panel) {
@@ -1628,7 +1631,7 @@ const notebookPlugin = {
                                     sessionStorage.setItem(`vfs-cache:${_fn}`, JSON.stringify(panel.context.model.toJSON()));
                                 }
                                 catch (_b) { }
-                                (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
+                                (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
                             }
                         }
                         else {
@@ -1644,22 +1647,22 @@ const notebookPlugin = {
                             if (_rd.button.label === 'Cancel')
                                 return;
                             if (_rd.button.accept) {
-                                await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.downloadNotebookCommand);
+                                await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.downloadNotebookCommand);
                             }
                         }
                     }
                 }
-                const handle = (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.getCurrentFileHandle)();
+                const handle = (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.getCurrentFileHandle)();
                 if (handle) {
-                    (0,_recents__WEBPACK_IMPORTED_MODULE_15__.removeRecentNotebook)({ label: handle.name });
+                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.removeRecentNotebook)({ label: handle.name });
                 }
                 else if (notebookSourceUrl !== null) {
-                    (0,_recents__WEBPACK_IMPORTED_MODULE_15__.removeRecentNotebook)({ url: notebookSourceUrl });
+                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.removeRecentNotebook)({ url: notebookSourceUrl });
                 }
                 else if (panel) {
-                    (0,_recents__WEBPACK_IMPORTED_MODULE_15__.removeRecentNotebook)({ label: panel.context.path });
+                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.removeRecentNotebook)({ label: panel.context.path });
                 }
-                const _nextRecents = (0,_recents__WEBPACK_IMPORTED_MODULE_15__.getRecentNotebooks)();
+                const _nextRecents = (0,_recents__WEBPACK_IMPORTED_MODULE_16__.getRecentNotebooks)();
                 flushVfsCaches();
                 _ckIntentionalNav = true;
                 tracker.forEach(w => { w.context.model.dirty = false; });
@@ -1668,7 +1671,7 @@ const notebookPlugin = {
                         const _cachedNext = sessionStorage.getItem(`vfs-cache:${_next.path}`);
                         if (!_cachedNext)
                             continue; // stale entry — try next recent
-                        const _uid = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
+                        const _uid = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
                         localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
                         localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
                         localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
@@ -1695,7 +1698,7 @@ const notebookPlugin = {
                 await createNewNotebook();
             }
         });
-        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.clearStorage, {
+        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.clearStorage, {
             label: 'Clear storage',
             execute: async () => {
                 const dirtyPaths = [];
@@ -1736,7 +1739,7 @@ const notebookPlugin = {
                 ssKeys.forEach(k => sessionStorage.removeItem(k));
                 // Clear IndexedDB (file handles)
                 indexedDB.deleteDatabase('jupytereverywhere-fs');
-                (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.setCurrentFileHandle)(null);
+                (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.setCurrentFileHandle)(null);
                 _ckIntentionalNav = true;
                 tracker.forEach(w => { w.context.model.dirty = false; });
                 const url = new URL(window.location.href);
@@ -1745,7 +1748,7 @@ const notebookPlugin = {
                 window.location.href = url.toString();
             }
         });
-        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.openFromGitHub, {
+        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.openFromGitHub, {
             label: 'Open from GitHub',
             execute: async () => {
                 const widget = new _ui_components_GitHubBrowserDialog__WEBPACK_IMPORTED_MODULE_3__.GitHubBrowserWidget();
@@ -1775,7 +1778,7 @@ const notebookPlugin = {
                 document.removeEventListener('keydown', githubEnterHandler, true);
             }
         });
-        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.copyShareLink, {
+        commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.copyShareLink, {
             label: 'Copy link to GitHub source',
             isEnabled: () => { var _a; return notebookSourceUrl !== null && !((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); },
             execute: () => {
@@ -1790,8 +1793,17 @@ const notebookPlugin = {
                 });
             }
         });
-        tracker.currentChanged.connect(() => {
-            requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+        tracker.currentChanged.connect((_, panel) => {
+            if (!panel)
+                return;
+            requestAnimationFrame(() => {
+                const toolbar = panel.toolbar;
+                const w = toolbar.node.clientWidth;
+                const h = toolbar.node.clientHeight;
+                if (w > 0) {
+                    _lumino_messaging__WEBPACK_IMPORTED_MODULE_8__.MessageLoop.sendMessage(toolbar, new _lumino_widgets__WEBPACK_IMPORTED_MODULE_7__.Widget.ResizeMessage(w, h));
+                }
+            });
         });
         tracker.widgetAdded.connect(async (_, panel) => {
             var _a;
@@ -1872,29 +1884,29 @@ const notebookPlugin = {
         }, () => {
             openNewNotebookWindow('python');
         }, () => {
-            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.downloadNotebookCommand);
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.downloadNotebookCommand);
         }, () => {
-            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.downloadPDFCommand);
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.downloadPDFCommand);
         }, () => {
-            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.openFromGitHub);
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.openFromGitHub);
         }, () => {
-            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.copyShareLink);
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.copyShareLink);
         }, () => { var _a; return notebookSourceUrl !== null && !((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => {
-            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveNotebookCommand);
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
         }, () => { var _a; return !!((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => {
-            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.saveToFile);
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveToFile);
         }, () => {
-            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.closeNotebook);
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.closeNotebook);
         }, () => {
-            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.clearStorage);
-        }, () => (0,_recents__WEBPACK_IMPORTED_MODULE_15__.getRecentNotebooks)().map(nb => ({
+            void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.clearStorage);
+        }, () => (0,_recents__WEBPACK_IMPORTED_MODULE_16__.getRecentNotebooks)().map(nb => ({
             label: nb.label,
             open: () => {
                 void openRecentNotebook(nb);
             },
             isCurrent: () => {
                 var _a;
-                const handle = (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.getCurrentFileHandle)();
+                const handle = (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.getCurrentFileHandle)();
                 if (nb.type === 'file') {
                     return handle !== null && handle.name === nb.label;
                 }
@@ -2887,4 +2899,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.bd081163a6dfcad688ba.js.map
+//# sourceMappingURL=lib_index_js.83570233306a3db10fed.js.map
