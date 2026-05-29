@@ -802,22 +802,20 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
         _ckIntentionalNav = true;
         tracker.forEach(w => { w.context.model.dirty = false; });
 
-        if (_nextRecents.length > 0) {
-          const _next = _nextRecents[0];
+        for (const _next of _nextRecents) {
           if (_next.type === 'vfs' && _next.path) {
             const _cachedNext = sessionStorage.getItem(`vfs-cache:${_next.path}`);
-            if (_cachedNext) {
-              const _uid = UUID.uuid4();
-              localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
-              localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
-              localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
-              const _t = new URL(window.location.href);
-              _t.search = '';
-              _t.searchParams.set('uploaded-notebook', _uid);
-              _t.hash = '';
-              window.location.href = _t.toString();
-              return;
-            }
+            if (!_cachedNext) continue; // stale entry — try next recent
+            const _uid = UUID.uuid4();
+            localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
+            localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
+            localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
+            const _t = new URL(window.location.href);
+            _t.search = '';
+            _t.searchParams.set('uploaded-notebook', _uid);
+            _t.hash = '';
+            window.location.href = _t.toString();
+            return;
           } else if (_next.type === 'github' && _next.url) {
             const _t = new URL(window.location.href);
             _t.search = '';
@@ -831,10 +829,7 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
           }
         }
 
-        const _blankUrl = new URL(window.location.href);
-        _blankUrl.search = '';
-        _blankUrl.hash = '';
-        window.location.href = _blankUrl.toString();
+        await createNewNotebook();
       }
     });
 

@@ -1662,22 +1662,21 @@ const notebookPlugin = {
                 flushVfsCaches();
                 _ckIntentionalNav = true;
                 tracker.forEach(w => { w.context.model.dirty = false; });
-                if (_nextRecents.length > 0) {
-                    const _next = _nextRecents[0];
+                for (const _next of _nextRecents) {
                     if (_next.type === 'vfs' && _next.path) {
                         const _cachedNext = sessionStorage.getItem(`vfs-cache:${_next.path}`);
-                        if (_cachedNext) {
-                            const _uid = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
-                            localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
-                            localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
-                            localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
-                            const _t = new URL(window.location.href);
-                            _t.search = '';
-                            _t.searchParams.set('uploaded-notebook', _uid);
-                            _t.hash = '';
-                            window.location.href = _t.toString();
-                            return;
-                        }
+                        if (!_cachedNext)
+                            continue; // stale entry — try next recent
+                        const _uid = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
+                        localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
+                        localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
+                        localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
+                        const _t = new URL(window.location.href);
+                        _t.search = '';
+                        _t.searchParams.set('uploaded-notebook', _uid);
+                        _t.hash = '';
+                        window.location.href = _t.toString();
+                        return;
                     }
                     else if (_next.type === 'github' && _next.url) {
                         const _t = new URL(window.location.href);
@@ -1692,10 +1691,7 @@ const notebookPlugin = {
                         return;
                     }
                 }
-                const _blankUrl = new URL(window.location.href);
-                _blankUrl.search = '';
-                _blankUrl.hash = '';
-                window.location.href = _blankUrl.toString();
+                await createNewNotebook();
             }
         });
         commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_11__.Commands.clearStorage, {
@@ -2887,4 +2883,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.5eb6993be7769320b9be.js.map
+//# sourceMappingURL=lib_index_js.00ccc1e161efc46589b1.js.map
