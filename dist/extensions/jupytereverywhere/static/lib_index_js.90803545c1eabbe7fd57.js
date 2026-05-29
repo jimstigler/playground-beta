@@ -1565,6 +1565,7 @@ const notebookPlugin = {
                 try {
                     await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.saveToHandle)(handle, text);
                     (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.setCurrentFileHandle)(handle);
+                    notebookSourceUrl = null;
                     const recentKey = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_8__.UUID.uuid4();
                     await (0,_filesystem__WEBPACK_IMPORTED_MODULE_14__.storeRecentHandle)(recentKey, handle);
                     (0,_recents__WEBPACK_IMPORTED_MODULE_15__.addRecentNotebook)({ label: handle.name, type: 'file', handleKey: recentKey });
@@ -2883,4 +2884,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.00ccc1e161efc46589b1.js.map
+//# sourceMappingURL=lib_index_js.90803545c1eabbe7fd57.js.map

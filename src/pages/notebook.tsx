@@ -711,6 +711,7 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
         try {
           await saveToHandle(handle, text);
           setCurrentFileHandle(handle);
+          notebookSourceUrl = null;
           const recentKey = UUID.uuid4();
           await storeRecentHandle(recentKey, handle);
           addRecentNotebook({ label: handle.name, type: 'file', handleKey: recentKey });
