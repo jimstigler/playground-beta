@@ -11,10 +11,10 @@ var _JUPYTERLAB;
 
 var moduleMap = {
 	"./index": () => {
-		return Promise.all([__webpack_require__.e("vendors-node_modules_html2canvas_dist_html2canvas_js"), __webpack_require__.e("webpack_sharing_consume_default_jupyterlab_application-webpack_sharing_consume_default_jupyte-d06e1b"), __webpack_require__.e("lib_index_js")]).then(() => (() => ((__webpack_require__(/*! ./lib/index.js */ "./lib/index.js")))));
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_jupyterlab_application-webpack_sharing_consume_default_jupyte-d06e1b"), __webpack_require__.e("lib_index_js")]).then(() => (() => ((__webpack_require__(/*! ./lib/index.js */ "./lib/index.js")))));
 	},
 	"./extension": () => {
-		return Promise.all([__webpack_require__.e("vendors-node_modules_html2canvas_dist_html2canvas_js"), __webpack_require__.e("webpack_sharing_consume_default_jupyterlab_application-webpack_sharing_consume_default_jupyte-d06e1b"), __webpack_require__.e("lib_index_js")]).then(() => (() => ((__webpack_require__(/*! ./lib/index.js */ "./lib/index.js")))));
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_jupyterlab_application-webpack_sharing_consume_default_jupyte-d06e1b"), __webpack_require__.e("lib_index_js")]).then(() => (() => ((__webpack_require__(/*! ./lib/index.js */ "./lib/index.js")))));
 	},
 	"./style": () => {
 		return __webpack_require__.e("style_index_js").then(() => (() => ((__webpack_require__(/*! ./style/index.js */ "./style/index.js")))));
@@ -75,7 +75,7 @@ __webpack_require__.d(exports, {
 /******/ 			e.code = 'MODULE_NOT_FOUND';
 /******/ 			throw e;
 /******/ 		}
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -97,36 +97,6 @@ __webpack_require__.d(exports, {
 /******/ 				() => (module);
 /******/ 			__webpack_require__.d(getter, { a: getter });
 /******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/create fake namespace object */
-/******/ 	(() => {
-/******/ 		var getProto = Object.getPrototypeOf ? (obj) => (Object.getPrototypeOf(obj)) : (obj) => (obj.__proto__);
-/******/ 		var leafPrototypes;
-/******/ 		// create a fake namespace object
-/******/ 		// mode & 1: value is a module id, require it
-/******/ 		// mode & 2: merge all properties of value into the ns
-/******/ 		// mode & 4: return value when already ns object
-/******/ 		// mode & 16: return value when it's Promise-like
-/******/ 		// mode & 8|1: behave like require
-/******/ 		__webpack_require__.t = function(value, mode) {
-/******/ 			if(mode & 1) value = this(value);
-/******/ 			if(mode & 8) return value;
-/******/ 			if(typeof value === 'object' && value) {
-/******/ 				if((mode & 4) && value.__esModule) return value;
-/******/ 				if((mode & 16) && typeof value.then === 'function') return value;
-/******/ 			}
-/******/ 			var ns = Object.create(null);
-/******/ 			__webpack_require__.r(ns);
-/******/ 			var def = {};
-/******/ 			leafPrototypes = leafPrototypes || [null, getProto({}), getProto([]), getProto(getProto)];
-/******/ 			for(var current = mode & 2 && value; (typeof current == 'object' || typeof current == 'function') && !~leafPrototypes.indexOf(current); current = getProto(current)) {
-/******/ 				Object.getOwnPropertyNames(current).forEach((key) => (def[key] = () => (value[key])));
-/******/ 			}
-/******/ 			def['default'] = () => (value);
-/******/ 			__webpack_require__.d(ns, def);
-/******/ 			return ns;
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -160,7 +130,7 @@ __webpack_require__.d(exports, {
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"vendors-node_modules_html2canvas_dist_html2canvas_js":"9432abca2d7a2ae7175f","lib_index_js":"e8ee19592236b7a1cb83","style_index_js":"53e61b476b277dd5a7fb","vendors-node_modules_jupyterlite_application_lib_index_js":"8de23fac4569e11d7bba","vendors-node_modules_jspdf_dist_jspdf_es_min_js":"aa26f92b879dcc9ec047","vendors-node_modules_dompurify_dist_purify_es_mjs":"6ea8a56c25123ec86f45","vendors-node_modules_canvg_lib_index_es_js":"209dc86e2a4479ffe80c"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"lib_index_js":"f22ddb9f32851866e9dd","style_index_js":"f81a7095d054928d3c08","vendors-node_modules_jupyterlite_application_lib_index_js":"8de23fac4569e11d7bba"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -279,8 +249,7 @@ __webpack_require__.d(exports, {
 /******/ 			switch(name) {
 /******/ 				case "default": {
 /******/ 					register("@jupyterlite/application", "0.7.6", () => (Promise.all([__webpack_require__.e("vendors-node_modules_jupyterlite_application_lib_index_js"), __webpack_require__.e("webpack_sharing_consume_default_jupyterlab_application-webpack_sharing_consume_default_jupyte-d06e1b"), __webpack_require__.e("webpack_sharing_consume_default_jupyterlab_docregistry-webpack_sharing_consume_default_jupyte-779e9b")]).then(() => (() => (__webpack_require__(/*! ./node_modules/@jupyterlite/application/lib/index.js */ "./node_modules/@jupyterlite/application/lib/index.js"))))));
-/******/ 					register("jspdf", "3.0.4", () => (__webpack_require__.e("vendors-node_modules_jspdf_dist_jspdf_es_min_js").then(() => (() => (__webpack_require__(/*! ./node_modules/jspdf/dist/jspdf.es.min.js */ "./node_modules/jspdf/dist/jspdf.es.min.js"))))));
-/******/ 					register("jupytereverywhere", "1.1.4", () => (Promise.all([__webpack_require__.e("vendors-node_modules_html2canvas_dist_html2canvas_js"), __webpack_require__.e("webpack_sharing_consume_default_jupyterlab_application-webpack_sharing_consume_default_jupyte-d06e1b"), __webpack_require__.e("lib_index_js")]).then(() => (() => (__webpack_require__(/*! ./lib/index.js */ "./lib/index.js"))))));
+/******/ 					register("jupytereverywhere", "1.1.4", () => (Promise.all([__webpack_require__.e("webpack_sharing_consume_default_jupyterlab_application-webpack_sharing_consume_default_jupyte-d06e1b"), __webpack_require__.e("lib_index_js")]).then(() => (() => (__webpack_require__(/*! ./lib/index.js */ "./lib/index.js"))))));
 /******/ 				}
 /******/ 				break;
 /******/ 			}
@@ -453,7 +422,6 @@ __webpack_require__.d(exports, {
 /******/ 			"webpack/sharing/consume/default/@jupyterlab/statedb": () => (loadSingletonVersion("default", "@jupyterlab/statedb", false, [1,4,4,0,,"alpha",0])),
 /******/ 			"webpack/sharing/consume/default/@jupyterlite/application/@jupyterlite/application": () => (loadStrictVersion("default", "@jupyterlite/application", false, [2,0,7,0], () => (Promise.all([__webpack_require__.e("vendors-node_modules_jupyterlite_application_lib_index_js"), __webpack_require__.e("webpack_sharing_consume_default_jupyterlab_docregistry-webpack_sharing_consume_default_jupyte-779e9b")]).then(() => (() => (__webpack_require__(/*! @jupyterlite/application */ "./node_modules/@jupyterlite/application/lib/index.js"))))))),
 /******/ 			"webpack/sharing/consume/default/@lumino/messaging": () => (loadSingletonVersion("default", "@lumino/messaging", false, [1,2,0,0])),
-/******/ 			"webpack/sharing/consume/default/jspdf/jspdf": () => (loadStrictVersion("default", "jspdf", false, [1,3,0,3], () => (__webpack_require__.e("vendors-node_modules_jspdf_dist_jspdf_es_min_js").then(() => (() => (__webpack_require__(/*! jspdf */ "./node_modules/jspdf/dist/jspdf.es.min.js"))))))),
 /******/ 			"webpack/sharing/consume/default/react": () => (loadSingletonVersion("default", "react", false, [1,18,2,0])),
 /******/ 			"webpack/sharing/consume/default/@jupyterlab/docregistry": () => (loadVersion("default", "@jupyterlab/docregistry", false, [1,4,4,0,,"alpha",0])),
 /******/ 			"webpack/sharing/consume/default/@jupyterlab/rendermime": () => (loadSingletonVersion("default", "@jupyterlab/rendermime", false, [1,4,4,0,,"alpha",0])),
@@ -483,7 +451,6 @@ __webpack_require__.d(exports, {
 /******/ 				"webpack/sharing/consume/default/@jupyterlab/statedb",
 /******/ 				"webpack/sharing/consume/default/@jupyterlite/application/@jupyterlite/application",
 /******/ 				"webpack/sharing/consume/default/@lumino/messaging",
-/******/ 				"webpack/sharing/consume/default/jspdf/jspdf",
 /******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
 /******/ 			"webpack_sharing_consume_default_jupyterlab_docregistry-webpack_sharing_consume_default_jupyte-779e9b": [
@@ -548,7 +515,7 @@ __webpack_require__.d(exports, {
 /******/ 					if(installedChunkData) {
 /******/ 						promises.push(installedChunkData[2]);
 /******/ 					} else {
-/******/ 						if(!/^webpack_sharing_consume_default_jupyterlab_(application\-webpack_sharing_consume_default_jupyte\-d06e1|docregistry\-webpack_sharing_consume_default_jupyte\-779e9)b$/.test(chunkId)) {
+/******/ 						if(/^(((|vendors\-node_modules_jupyterlite_application_)lib|style)_index_js|jupytereverywhere)$/.test(chunkId)) {
 /******/ 							// setup Promise in chunk cache
 /******/ 							var promise = new Promise((resolve, reject) => (installedChunkData = installedChunks[chunkId] = [resolve, reject]));
 /******/ 							promises.push(installedChunkData[2] = promise);
@@ -633,4 +600,4 @@ __webpack_require__.d(exports, {
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=remoteEntry.a3a3a2d8e7fff6697687.js.map
+//# sourceMappingURL=remoteEntry.8939d4246c0adc83ef42.js.map
