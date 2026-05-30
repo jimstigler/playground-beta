@@ -1962,21 +1962,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0__);
 // Adapted from https://github.com/jupyterlite/jupyterlite/pull/1625
 
-// Print on the current page rather than opening a new window.
-// This means:
-//   • Markdown is already rendered — JupyterLab's JS has done its work.
-//   • MathJax has already typeset the math — no re-processing needed.
-//   • Cross-origin images (S3, CDNs) display freely — the browser's native
-//     print renderer has no canvas-taint restriction.
-// The @media print rules in base.css override Lumino's absolute-position
-// inline styles and handle all layout, hiding, and pagination.
+// Strategy: copy the notebook's already-rendered innerHTML into a clean
+// div (#je-print-container) appended to <body>, then call window.print().
+//
+// @media print CSS hides every other body child and shows only this div.
+// This sidesteps Lumino's absolute-position layout entirely — no need to
+// override it — while preserving:
+//   • Rendered markdown (HTML, not raw text) — classes/inline styles intact
+//   • Typeset math (MathJax SVG/CHTML already in the DOM)
+//   • Syntax-highlighted code (CodeMirror DOM already rendered)
+//   • Cross-origin images (browser native print, no canvas restriction)
 function exportNotebookAsPDF(notebook, fileName) {
     const name = fileName !== null && fileName !== void 0 ? fileName : _jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0__.PathExt.basename(notebook.context.path, _jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0__.PathExt.extname(notebook.context.path));
-    // Browsers use document.title as the default filename in Save As PDF.
+    const container = document.createElement('div');
+    container.id = 'je-print-container';
+    container.innerHTML = notebook.content.node.innerHTML;
+    document.body.appendChild(container);
     const prev = document.title;
     document.title = name;
     window.print();
     document.title = prev;
+    document.body.removeChild(container);
 }
 
 
@@ -2894,4 +2900,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.6e38166c32e0e7822f01.js.map
+//# sourceMappingURL=lib_index_js.29421dd905ed2d5bb9f0.js.map

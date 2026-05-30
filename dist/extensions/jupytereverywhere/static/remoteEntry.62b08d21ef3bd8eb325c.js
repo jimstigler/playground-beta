@@ -130,7 +130,7 @@ __webpack_require__.d(exports, {
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"lib_index_js":"6e38166c32e0e7822f01","style_index_js":"361ae6b786ef7204ed52","vendors-node_modules_jupyterlite_application_lib_index_js":"8de23fac4569e11d7bba"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"lib_index_js":"29421dd905ed2d5bb9f0","style_index_js":"73fe4fc6753189d3fac6","vendors-node_modules_jupyterlite_application_lib_index_js":"8de23fac4569e11d7bba"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -600,4 +600,4 @@ __webpack_require__.d(exports, {
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=remoteEntry.69309442e59758f91a90.js.map
+//# sourceMappingURL=remoteEntry.62b08d21ef3bd8eb325c.js.map

@@ -38,14 +38,16 @@ import { INotebookModel, Notebook } from '@jupyterlab/notebook';
 import { PathExt } from '@jupyterlab/coreutils';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
-// Print on the current page rather than opening a new window.
-// This means:
-//   • Markdown is already rendered — JupyterLab's JS has done its work.
-//   • MathJax has already typeset the math — no re-processing needed.
-//   • Cross-origin images (S3, CDNs) display freely — the browser's native
-//     print renderer has no canvas-taint restriction.
-// The @media print rules in base.css override Lumino's absolute-position
-// inline styles and handle all layout, hiding, and pagination.
+// Strategy: copy the notebook's already-rendered innerHTML into a clean
+// div (#je-print-container) appended to <body>, then call window.print().
+//
+// @media print CSS hides every other body child and shows only this div.
+// This sidesteps Lumino's absolute-position layout entirely — no need to
+// override it — while preserving:
+//   • Rendered markdown (HTML, not raw text) — classes/inline styles intact
+//   • Typeset math (MathJax SVG/CHTML already in the DOM)
+//   • Syntax-highlighted code (CodeMirror DOM already rendered)
+//   • Cross-origin images (browser native print, no canvas restriction)
 export function exportNotebookAsPDF(
   notebook: DocumentWidget<Notebook, INotebookModel>,
   fileName?: string
@@ -57,9 +59,15 @@ export function exportNotebookAsPDF(
       PathExt.extname(notebook.context.path)
     );
 
-  // Browsers use document.title as the default filename in Save As PDF.
+  const container = document.createElement('div');
+  container.id = 'je-print-container';
+  container.innerHTML = notebook.content.node.innerHTML;
+  document.body.appendChild(container);
+
   const prev = document.title;
   document.title = name;
   window.print();
   document.title = prev;
+
+  document.body.removeChild(container);
 }
