@@ -1972,96 +1972,61 @@ async function exportNotebookAsPDF(notebook, fileName) {
     const name = fileName !== null && fileName !== void 0 ? fileName : defaultName;
     const outputName = name.toLowerCase().endsWith('.pdf') ? name : `${name}.pdf`;
     const sourceEl = notebook.content.node;
-    // Clone into an off-screen container with no overflow/height constraints so
-    // html2canvas captures the full content, not just the visible viewport.
-    const offscreen = document.createElement('div');
-    offscreen.style.cssText = [
-        'position:absolute',
-        'left:-9999px',
-        'top:0',
-        `width:${sourceEl.scrollWidth}px`,
-        'overflow:visible',
-        'background:#fff',
-    ].join(';');
-    const clone = sourceEl.cloneNode(true);
-    clone.style.cssText = [
-        'position:static',
-        'height:auto',
-        'max-height:none',
-        'overflow:visible',
-        `width:${sourceEl.scrollWidth}px`,
-    ].join(';');
-    offscreen.appendChild(clone);
-    document.body.appendChild(offscreen);
-    // Copy canvas pixel data from the live element to the clone so rendered
-    // plots appear in the PDF.
-    const srcCanvases = Array.from(sourceEl.querySelectorAll('canvas'));
-    const dstCanvases = Array.from(clone.querySelectorAll('canvas'));
-    srcCanvases.forEach((src, i) => {
-        var _a;
-        const dst = dstCanvases[i];
-        if (!dst)
-            return;
-        try {
-            dst.width = src.width;
-            dst.height = src.height;
-            (_a = dst.getContext('2d')) === null || _a === void 0 ? void 0 : _a.drawImage(src, 0, 0);
+    const fullHeight = sourceEl.scrollHeight;
+    // Collect cell top positions relative to the notebook element before
+    // any DOM modification. Positions are stable — only container height changes.
+    const containerTop = sourceEl.getBoundingClientRect().top;
+    const cellTopsPx = Array.from(sourceEl.querySelectorAll('.jp-Cell')).map(cell => cell.getBoundingClientRect().top - containerTop);
+    const saves = [];
+    const saveAndFix = (el, height) => {
+        saves.push({
+            el,
+            overflow: el.style.overflow,
+            overflowY: el.style.overflowY,
+            height: el.style.height,
+            maxHeight: el.style.maxHeight,
+        });
+        el.style.overflow = 'visible';
+        el.style.overflowY = 'visible';
+        el.style.maxHeight = 'none';
+        if (height !== undefined)
+            el.style.height = height + 'px';
+    };
+    saveAndFix(sourceEl, fullHeight);
+    let ancestor = sourceEl.parentElement;
+    while (ancestor && ancestor !== document.documentElement) {
+        const cs = getComputedStyle(ancestor);
+        if (cs.overflow !== 'visible' || cs.overflowY !== 'visible') {
+            saveAndFix(ancestor);
         }
-        catch (_b) {
-            // Silently skip cross-origin canvases
-        }
-    });
-    // Copy image pixel data from the live element to the clone. Off-screen imgs
-    // may have lazy loading disabled or may not be re-fetchable from the clone's
-    // detached position, so we snapshot each img into a data URL directly.
-    const srcImgs = Array.from(sourceEl.querySelectorAll('img'));
-    const dstImgs = Array.from(clone.querySelectorAll('img'));
-    srcImgs.forEach((srcImg, i) => {
-        var _a;
-        const dstImg = dstImgs[i];
-        if (!dstImg)
-            return;
-        dstImg.loading = 'eager';
-        if (srcImg.complete && srcImg.naturalWidth > 0) {
-            try {
-                const tmp = document.createElement('canvas');
-                tmp.width = srcImg.naturalWidth;
-                tmp.height = srcImg.naturalHeight;
-                (_a = tmp.getContext('2d')) === null || _a === void 0 ? void 0 : _a.drawImage(srcImg, 0, 0);
-                dstImg.src = tmp.toDataURL('image/png');
-            }
-            catch (_b) {
-                // Cross-origin image — leave src as-is for html2canvas to handle
-            }
-        }
-    });
-    // Wait for any images that still need to load before capturing.
-    await Promise.all(Array.from(clone.querySelectorAll('img')).map(img => img.complete
-        ? Promise.resolve()
-        : new Promise(resolve => { img.onload = img.onerror = () => resolve(); })));
-    // Collect each cell's top y-position (pixels from container top) before
-    // we remove the element from the DOM.
-    const containerTop = offscreen.getBoundingClientRect().top;
-    const cellTopsPx = Array.from(clone.querySelectorAll('.jp-Cell')).map(cell => cell.getBoundingClientRect().top - containerTop);
+        ancestor = ancestor.parentElement;
+    }
     let canvas;
     try {
-        canvas = await html2canvas__WEBPACK_IMPORTED_MODULE_2___default()(offscreen, { scale: 1, useCORS: true });
+        canvas = await html2canvas__WEBPACK_IMPORTED_MODULE_2___default()(sourceEl, {
+            scale: 1,
+            useCORS: true,
+        });
     }
     finally {
-        document.body.removeChild(offscreen);
+        for (const { el, overflow, overflowY, height, maxHeight } of saves) {
+            el.style.overflow = overflow;
+            el.style.overflowY = overflowY;
+            el.style.height = height;
+            el.style.maxHeight = maxHeight;
+        }
     }
     if (canvas.height === 0)
         return;
     const doc = new jspdf__WEBPACK_IMPORTED_MODULE_1__["default"]({ orientation: 'portrait', format: 'a4', unit: 'mm' });
-    const pageWidth = doc.internal.pageSize.getWidth(); // 210 mm
-    const pageHeight = doc.internal.pageSize.getHeight(); // 297 mm
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const mmPerPx = pageWidth / canvas.width;
     const totalHeightMm = canvas.height * mmPerPx;
     const cellTopsMm = cellTopsPx.map(px => px * mmPerPx);
-    // Build page break positions that land at cell boundaries.
-    // For each candidate break (cursor + pageHeight), find the latest cell
-    // start that falls at or before that point — the cell will then begin
-    // fresh on the next page rather than being split.
+    // Build page breaks that land at cell boundaries so no cell is split.
+    // For each candidate break, walk back to the latest cell start at or
+    // before that point — that cell will begin fresh on the next page.
     const breaks = [0];
     let cursor = 0;
     while (cursor < totalHeightMm) {
@@ -2078,8 +2043,7 @@ async function exportNotebookAsPDF(notebook, fileName) {
         cursor = bestBreak;
     }
     breaks.push(totalHeightMm);
-    // Render each page as an independent canvas slice so that the break
-    // position can vary per page.
+    // Render each page as an independent canvas slice.
     for (let i = 0; i < breaks.length - 1; i++) {
         const startPx = Math.round(breaks[i] / mmPerPx);
         const endPx = Math.round(breaks[i + 1] / mmPerPx);
@@ -3011,4 +2975,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.d2d83c010b446c5c85bb.js.map
+//# sourceMappingURL=lib_index_js.48b7f87c4e9fcfb7ac12.js.map
