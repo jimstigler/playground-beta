@@ -1972,9 +1972,8 @@ async function exportNotebookAsPDF(notebook, fileName) {
     const name = fileName !== null && fileName !== void 0 ? fileName : defaultName;
     const outputName = name.toLowerCase().endsWith('.pdf') ? name : `${name}.pdf`;
     const sourceEl = notebook.content.node;
-    // Clone the notebook into an off-screen container with no overflow constraints.
-    // We can't capture sourceEl directly because it is a fixed-height scroll container —
-    // html2canvas only captures the visible viewport, not the scrolled content.
+    // Clone into an off-screen container with no overflow/height constraints so
+    // html2canvas captures the full content, not just the visible viewport.
     const offscreen = document.createElement('div');
     offscreen.style.cssText = [
         'position:absolute',
@@ -1994,8 +1993,8 @@ async function exportNotebookAsPDF(notebook, fileName) {
     ].join(';');
     offscreen.appendChild(clone);
     document.body.appendChild(offscreen);
-    // Copy canvas pixel data from the live element to the clone so that
-    // rendered plots (matplotlib, etc.) appear in the PDF.
+    // Copy canvas pixel data from the live element to the clone so rendered
+    // plots appear in the PDF.
     const srcCanvases = Array.from(sourceEl.querySelectorAll('canvas'));
     const dstCanvases = Array.from(clone.querySelectorAll('canvas'));
     srcCanvases.forEach((src, i) => {
@@ -2012,6 +2011,10 @@ async function exportNotebookAsPDF(notebook, fileName) {
             // Silently skip cross-origin canvases
         }
     });
+    // Collect each cell's top y-position (pixels from container top) before
+    // we remove the element from the DOM.
+    const containerTop = offscreen.getBoundingClientRect().top;
+    const cellTopsPx = Array.from(clone.querySelectorAll('.jp-Cell')).map(cell => cell.getBoundingClientRect().top - containerTop);
     let canvas;
     try {
         canvas = await html2canvas__WEBPACK_IMPORTED_MODULE_2___default()(offscreen, { scale: 1, useCORS: true });
@@ -2021,18 +2024,46 @@ async function exportNotebookAsPDF(notebook, fileName) {
     }
     if (canvas.height === 0)
         return;
-    const imgData = canvas.toDataURL('image/jpeg', 0.92);
     const doc = new jspdf__WEBPACK_IMPORTED_MODULE_1__["default"]({ orientation: 'portrait', format: 'a4', unit: 'mm' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    // Total image height in mm once scaled to fit the page width
-    const totalHeightMm = (canvas.height / canvas.width) * pageWidth;
-    let yOffset = 0;
-    for (let page = 0; yOffset < totalHeightMm; page++) {
-        if (page > 0)
+    const pageWidth = doc.internal.pageSize.getWidth(); // 210 mm
+    const pageHeight = doc.internal.pageSize.getHeight(); // 297 mm
+    const mmPerPx = pageWidth / canvas.width;
+    const totalHeightMm = canvas.height * mmPerPx;
+    const cellTopsMm = cellTopsPx.map(px => px * mmPerPx);
+    // Build page break positions that land at cell boundaries.
+    // For each candidate break (cursor + pageHeight), find the latest cell
+    // start that falls at or before that point — the cell will then begin
+    // fresh on the next page rather than being split.
+    const breaks = [0];
+    let cursor = 0;
+    while (cursor < totalHeightMm) {
+        const rawEnd = cursor + pageHeight;
+        if (rawEnd >= totalHeightMm)
+            break;
+        let bestBreak = rawEnd;
+        for (const cellTop of cellTopsMm) {
+            if (cellTop > cursor && cellTop <= rawEnd) {
+                bestBreak = cellTop; // keep updating — want the last one before rawEnd
+            }
+        }
+        breaks.push(bestBreak);
+        cursor = bestBreak;
+    }
+    breaks.push(totalHeightMm);
+    // Render each page as an independent canvas slice so that the break
+    // position can vary per page.
+    for (let i = 0; i < breaks.length - 1; i++) {
+        const startPx = Math.round(breaks[i] / mmPerPx);
+        const endPx = Math.round(breaks[i + 1] / mmPerPx);
+        const sliceHeightPx = endPx - startPx;
+        const sliceHeightMm = breaks[i + 1] - breaks[i];
+        const slice = document.createElement('canvas');
+        slice.width = canvas.width;
+        slice.height = sliceHeightPx;
+        slice.getContext('2d').drawImage(canvas, 0, startPx, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+        if (i > 0)
             doc.addPage();
-        doc.addImage(imgData, 'JPEG', 0, -yOffset, pageWidth, totalHeightMm);
-        yOffset += pageHeight;
+        doc.addImage(slice.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pageWidth, sliceHeightMm);
     }
     doc.save(outputName);
 }
@@ -2952,4 +2983,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.8aaf5d298389b75dc637.js.map
+//# sourceMappingURL=lib_index_js.766e31ca6b4dc97e9065.js.map
