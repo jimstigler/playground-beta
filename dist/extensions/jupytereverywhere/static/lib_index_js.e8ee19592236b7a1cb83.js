@@ -2011,6 +2011,59 @@ async function exportNotebookAsPDF(notebook, fileName) {
             // Silently skip cross-origin canvases
         }
     });
+    // Inline every img as a data URL so html2canvas can draw it without running
+    // into canvas-taint restrictions. Three-tier approach:
+    //   1. drawImage from the live element — instant, works for same-origin imgs.
+    //   2. fetch with CORS — works for cross-origin servers that have CORS
+    //      configured (e.g. S3 buckets serving public assets). cache:'no-cache'
+    //      avoids getting a cached non-CORS response that would taint the canvas.
+    //   3. Set crossOrigin="anonymous" and let html2canvas useCORS try last.
+    const srcImgs = Array.from(sourceEl.querySelectorAll('img'));
+    const dstImgs = Array.from(clone.querySelectorAll('img'));
+    await Promise.all(srcImgs.map(async (srcImg, i) => {
+        var _a;
+        const dstImg = dstImgs[i];
+        if (!dstImg)
+            return;
+        dstImg.loading = 'eager';
+        // Tier 1: same-origin / already-decoded
+        if (srcImg.complete && srcImg.naturalWidth > 0) {
+            try {
+                const tmp = document.createElement('canvas');
+                tmp.width = srcImg.naturalWidth;
+                tmp.height = srcImg.naturalHeight;
+                (_a = tmp.getContext('2d')) === null || _a === void 0 ? void 0 : _a.drawImage(srcImg, 0, 0);
+                dstImg.src = tmp.toDataURL('image/png');
+                return;
+            }
+            catch ( /* cross-origin taint — fall through */_b) { /* cross-origin taint — fall through */ }
+        }
+        // Tier 2: fetch with CORS (handles cross-origin images like S3)
+        const src = srcImg.src || dstImg.src;
+        if (src && !src.startsWith('data:') && !src.startsWith('blob:')) {
+            try {
+                const resp = await fetch(src, { mode: 'cors', cache: 'no-cache' });
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                    dstImg.src = dataUrl;
+                    return;
+                }
+            }
+            catch ( /* no CORS headers on server — fall through */_c) { /* no CORS headers on server — fall through */ }
+        }
+        // Tier 3: let html2canvas attempt it via useCORS
+        dstImg.crossOrigin = 'anonymous';
+    }));
+    // Wait for any imgs that still need to load after src changes above.
+    await Promise.all(dstImgs.map(img => img.complete
+        ? Promise.resolve()
+        : new Promise(resolve => { img.onload = img.onerror = () => resolve(); })));
     // Collect each cell's top y-position (pixels from container top) before
     // we remove the element from the DOM.
     const containerTop = offscreen.getBoundingClientRect().top;
@@ -2983,4 +3036,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.766e31ca6b4dc97e9065.js.map
+//# sourceMappingURL=lib_index_js.e8ee19592236b7a1cb83.js.map
