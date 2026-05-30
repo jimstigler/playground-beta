@@ -1961,28 +1961,41 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jupyterlab/coreutils */ "webpack/sharing/consume/default/@jupyterlab/coreutils");
 /* harmony import */ var _jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var jspdf__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! jspdf */ "webpack/sharing/consume/default/jspdf/jspdf");
+/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! html2canvas */ "./node_modules/html2canvas/dist/html2canvas.js");
+/* harmony import */ var html2canvas__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(html2canvas__WEBPACK_IMPORTED_MODULE_2__);
 // Adapted from https://github.com/jupyterlite/jupyterlite/pull/1625
 
 
-function exportNotebookAsPDF(notebook, fileName) {
+
+async function exportNotebookAsPDF(notebook, fileName) {
     const defaultName = _jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0__.PathExt.basename(notebook.context.path, _jupyterlab_coreutils__WEBPACK_IMPORTED_MODULE_0__.PathExt.extname(notebook.context.path));
     const name = fileName !== null && fileName !== void 0 ? fileName : defaultName;
-    const doc = new jspdf__WEBPACK_IMPORTED_MODULE_1__["default"]({ orientation: 'portrait', format: 'a4' });
-    return new Promise((resolve, reject) => {
-        doc.html(notebook.content.node, {
-            callback: () => {
-                try {
-                    doc.save(name.toLowerCase().endsWith('.pdf') ? name : `${name}.pdf`);
-                    resolve();
-                }
-                catch (err) {
-                    reject(err);
-                }
-            },
-            html2canvas: { scale: 0.25 },
-            autoPaging: 'slice'
-        });
+    const outputName = name.toLowerCase().endsWith('.pdf') ? name : `${name}.pdf`;
+    const element = notebook.content.node;
+    // Capture the full scrollable height, not just the visible viewport portion
+    const canvas = await html2canvas__WEBPACK_IMPORTED_MODULE_2___default()(element, {
+        scale: 1,
+        useCORS: true,
+        height: element.scrollHeight,
+        windowHeight: element.scrollHeight
     });
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    const doc = new jspdf__WEBPACK_IMPORTED_MODULE_1__["default"]({ orientation: 'portrait', format: 'a4', unit: 'mm' });
+    const pageWidth = doc.internal.pageSize.getWidth(); // 210 mm
+    const pageHeight = doc.internal.pageSize.getHeight(); // 297 mm
+    // Total image height in mm, scaled to fit the page width
+    const totalHeightMm = (canvas.height / canvas.width) * pageWidth;
+    let yOffset = 0;
+    let page = 0;
+    while (yOffset < totalHeightMm) {
+        if (page > 0)
+            doc.addPage();
+        // Shift the image up by yOffset so each page shows the next slice
+        doc.addImage(imgData, 'JPEG', 0, -yOffset, pageWidth, totalHeightMm);
+        yOffset += pageHeight;
+        page++;
+    }
+    doc.save(outputName);
 }
 
 
@@ -2900,4 +2913,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.108f7d04698a319a69cc.js.map
+//# sourceMappingURL=lib_index_js.d47beacf0ebe85e7bb96.js.map
