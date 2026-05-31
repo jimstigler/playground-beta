@@ -557,33 +557,44 @@ const plugin = {
                     await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_7__.Commands.saveToFile);
                     return;
                 }
-                // Safari/Firefox — save to browser VFS with a user-chosen name
-                const suggestedName = panel.context.path && panel.context.path !== 'Untitled.ipynb'
-                    ? panel.context.path.replace(/\.ipynb$/i, '')
-                    : (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_10__.generateDefaultNotebookName)();
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = suggestedName;
-                input.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
-                const body = new _lumino_widgets__WEBPACK_IMPORTED_MODULE_2__.Widget();
-                body.node.appendChild(input);
-                const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.showDialog)({
-                    title: 'Save changes in browser',
-                    body,
-                    buttons: [
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.cancelButton({ className: 'ck-btn' }),
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.okButton({ label: 'Save', className: 'ck-btn' })
-                    ]
-                });
-                if (!result.button.accept) {
-                    return;
+                // Safari/Firefox — save to browser VFS.
+                // Untitled notebooks get a name dialog first; all others save silently.
+                const isUntitled = !panel.context.path || panel.context.path === 'Untitled.ipynb';
+                let targetName = panel.context.path;
+                if (isUntitled) {
+                    const suggestedName = (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_10__.generateDefaultNotebookName)();
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = suggestedName;
+                    input.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
+                    const body = new _lumino_widgets__WEBPACK_IMPORTED_MODULE_2__.Widget();
+                    body.node.appendChild(input);
+                    const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.showDialog)({
+                        title: 'Save in browser',
+                        body,
+                        buttons: [
+                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.cancelButton({ className: 'ck-btn' }),
+                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.okButton({ label: 'Save', className: 'ck-btn' })
+                        ]
+                    });
+                    if (!result.button.accept)
+                        return;
+                    const entered = input.value.trim() || suggestedName;
+                    targetName = entered.toLowerCase().endsWith('.ipynb') ? entered : `${entered}.ipynb`;
                 }
-                const newName = (input.value.trim() || suggestedName) + '.ipynb';
                 try {
-                    if (newName !== panel.context.path) {
-                        await panel.context.rename(newName);
+                    if (targetName !== panel.context.path) {
+                        await panel.context.rename(targetName);
                     }
                     await panel.context.save();
+                    // Keep the VFS session cache in sync so recents can reopen this notebook
+                    try {
+                        sessionStorage.setItem(`vfs-cache:${panel.context.path}`, JSON.stringify(panel.context.model.toJSON()));
+                    }
+                    catch ( /* ignore quota errors */_a) { /* ignore quota errors */ }
+                    // Ensure this notebook appears in recents as a VFS entry
+                    const { addRecentNotebook } = await Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./recents */ "./lib/recents.js"));
+                    addRecentNotebook({ label: panel.context.path, type: 'vfs', path: panel.context.path });
                     (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_10__.showSavedToast)();
                 }
                 catch (err) {
@@ -1079,60 +1090,38 @@ const notebookPlugin = {
             }
         });
         const fsaSupported = (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.isFileSystemAccessSupported)();
-        if (!fsaSupported && !sessionStorage.getItem('ck-fsa-notice')) {
-            sessionStorage.setItem('ck-fsa-notice', '1');
-            setTimeout(() => {
-                _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Notification.info("File saving isn't supported in this browser — use \"Download notebook\" to save your work.", { autoClose: 10000 });
-            }, 2000);
-        }
-        const openNewNotebookWindow = async (kernelParam) => {
+        // Returns true if it's safe to navigate away (no unsaved changes, or user resolved them).
+        // Handles all three cases: Chrome+handle → Save, Chrome+no-handle → Save as file, Safari → Save in browser.
+        const promptIfDirty = async () => {
             const currentWidget = tracker.currentWidget;
-            if (fsaSupported && currentWidget && currentWidget.context.model.dirty) {
-                const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                    title: 'Unsaved Notebook',
-                    body: `"${currentWidget.context.path}" has unsaved changes.`,
-                    buttons: [
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: fsaSupported ? 'Save' : 'Download', className: 'ck-btn' })
-                    ]
-                });
-                if (result.button.label === 'Cancel')
-                    return;
-                if (result.button.accept) {
+            if (!currentWidget || !currentWidget.context.model.dirty)
+                return true;
+            const hasHandle = !!(0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.getCurrentFileHandle)();
+            const saveLabel = hasHandle ? 'Save' : fsaSupported ? 'Save as file' : 'Save in browser';
+            const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
+                title: 'Unsaved Changes',
+                body: `"${currentWidget.context.path}" has unsaved changes.`,
+                buttons: [
+                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
+                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
+                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: saveLabel, className: 'ck-btn' })
+                ]
+            });
+            if (result.button.label === 'Cancel')
+                return false;
+            if (result.button.accept) {
+                if (hasHandle || !fsaSupported) {
                     await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
                 }
-            }
-            if (!fsaSupported && currentWidget && currentWidget.context.model.dirty) {
-                const _hasCache = sessionStorage.getItem(`vfs-cache:${currentWidget.context.path}`) !== null;
-                if (!_hasCache) {
-                    const _ni = document.createElement('input');
-                    _ni.value = currentWidget.context.path.replace(/\.ipynb$/i, '') || 'my-notebook';
-                    _ni.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
-                    const _nb = new _lumino_widgets__WEBPACK_IMPORTED_MODULE_7__.Widget();
-                    _nb.node.appendChild(_ni);
-                    const _r = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                        title: 'Name your new notebook',
-                        body: _nb,
-                        buttons: [
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Save to browser', className: 'ck-btn' })
-                        ]
-                    });
-                    if (_r.button.label === 'Cancel')
-                        return;
-                    if (_r.button.accept) {
-                        const _rn = _ni.value.trim() || 'my-notebook';
-                        const _fn = _rn.toLowerCase().endsWith('.ipynb') ? _rn : `${_rn}.ipynb`;
-                        try {
-                            sessionStorage.setItem(`vfs-cache:${_fn}`, JSON.stringify(currentWidget.context.model.toJSON()));
-                        }
-                        catch (_a) { }
-                        (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
-                    }
+                else {
+                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveToFile); // Chrome, no handle → file picker
                 }
             }
+            return true;
+        };
+        const openNewNotebookWindow = async (kernelParam) => {
+            if (!await promptIfDirty())
+                return;
             const url = new URL(window.location.href);
             url.searchParams.delete('uploaded-notebook');
             url.searchParams.delete('from');
@@ -1249,53 +1238,8 @@ const notebookPlugin = {
                 }
                 const parsed = (await response.json());
                 const fileName = (_a = fetchUrl.split('/').pop()) !== null && _a !== void 0 ? _a : 'notebook.ipynb';
-                const currentWidget = tracker.currentWidget;
-                if (fsaSupported && currentWidget && currentWidget.context.model.dirty) {
-                    const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                        title: 'Unsaved Notebook',
-                        body: `"${currentWidget.context.path}" has unsaved changes.`,
-                        buttons: [
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Save', className: 'ck-btn' })
-                        ]
-                    });
-                    if (result.button.label === 'Cancel')
-                        return;
-                    if (result.button.accept) {
-                        await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
-                    }
-                }
-                if (!fsaSupported && currentWidget && currentWidget.context.model.dirty) {
-                    const _hasCache = sessionStorage.getItem(`vfs-cache:${currentWidget.context.path}`) !== null;
-                    if (!_hasCache) {
-                        const _ni = document.createElement('input');
-                        _ni.value = currentWidget.context.path.replace(/\.ipynb$/i, '') || 'my-notebook';
-                        _ni.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
-                        const _nb = new _lumino_widgets__WEBPACK_IMPORTED_MODULE_7__.Widget();
-                        _nb.node.appendChild(_ni);
-                        const _r = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                            title: 'Name your new notebook',
-                            body: _nb,
-                            buttons: [
-                                _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                                _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                                _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Save to browser', className: 'ck-btn' })
-                            ]
-                        });
-                        if (_r.button.label === 'Cancel')
-                            return;
-                        if (_r.button.accept) {
-                            const _rn = _ni.value.trim() || 'my-notebook';
-                            const _fn = _rn.toLowerCase().endsWith('.ipynb') ? _rn : `${_rn}.ipynb`;
-                            try {
-                                sessionStorage.setItem(`vfs-cache:${_fn}`, JSON.stringify(currentWidget.context.model.toJSON()));
-                            }
-                            catch (_b) { }
-                            (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
-                        }
-                    }
-                }
+                if (!await promptIfDirty())
+                    return;
                 (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: `GitHub: ${fileName}`, type: 'github', url: fetchUrl });
                 flushVfsCaches();
                 _ckIntentionalNav = true;
@@ -1324,53 +1268,8 @@ const notebookPlugin = {
             void createNewNotebook();
         }
         const openLocalFile = async () => {
-            const currentWidget = tracker.currentWidget;
-            if (fsaSupported && currentWidget && currentWidget.context.model.dirty) {
-                const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                    title: 'Unsaved Notebook',
-                    body: `"${currentWidget.context.path}" has unsaved changes.`,
-                    buttons: [
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: fsaSupported ? 'Save' : 'Download', className: 'ck-btn' })
-                    ]
-                });
-                if (result.button.label === 'Cancel')
-                    return;
-                if (result.button.accept) {
-                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
-                }
-            }
-            if (!fsaSupported && currentWidget && currentWidget.context.model.dirty) {
-                const _hasCache = sessionStorage.getItem(`vfs-cache:${currentWidget.context.path}`) !== null;
-                if (!_hasCache) {
-                    const _ni = document.createElement('input');
-                    _ni.value = currentWidget.context.path.replace(/\.ipynb$/i, '') || 'my-notebook';
-                    _ni.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
-                    const _nb = new _lumino_widgets__WEBPACK_IMPORTED_MODULE_7__.Widget();
-                    _nb.node.appendChild(_ni);
-                    const _r = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                        title: 'Name your new notebook',
-                        body: _nb,
-                        buttons: [
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Save to browser', className: 'ck-btn' })
-                        ]
-                    });
-                    if (_r.button.label === 'Cancel')
-                        return;
-                    if (_r.button.accept) {
-                        const _rn = _ni.value.trim() || 'my-notebook';
-                        const _fn = _rn.toLowerCase().endsWith('.ipynb') ? _rn : `${_rn}.ipynb`;
-                        try {
-                            sessionStorage.setItem(`vfs-cache:${_fn}`, JSON.stringify(currentWidget.context.model.toJSON()));
-                        }
-                        catch (_a) { }
-                        (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
-                    }
-                }
-            }
+            if (!await promptIfDirty())
+                return;
             if (!(0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.isFileSystemAccessSupported)()) {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -1404,7 +1303,7 @@ const notebookPlugin = {
             try {
                 parsed = JSON.parse(text);
             }
-            catch (_b) {
+            catch (_a) {
                 await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showErrorMessage)('Invalid notebook', 'The selected file is not a valid notebook.');
                 return;
             }
@@ -1456,6 +1355,8 @@ const notebookPlugin = {
                 localStorage.setItem(`uploaded-notebook-name:${uploadId}`, nb.path);
                 localStorage.setItem(`uploaded-notebook-from-cache:${uploadId}`, '1');
                 (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)(nb);
+                if (!await promptIfDirty())
+                    return;
                 const target = new URL(window.location.href);
                 target.search = '';
                 target.searchParams.set('uploaded-notebook', uploadId);
@@ -1520,28 +1421,8 @@ const notebookPlugin = {
                     target.search = '';
                     target.searchParams.set('uploaded-notebook', uploadId);
                     target.hash = '';
-                    // Warn only if the current notebook has unsaved edits.
-                    const currentWidget = tracker.currentWidget;
-                    if (currentWidget) {
-                        const isDirty = currentWidget.context.model.dirty;
-                        if (isDirty) {
-                            const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                                title: 'Unsaved Notebook',
-                                body: `"${currentWidget.context.path}" has unsaved changes.`,
-                                buttons: [
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: fsaSupported ? 'Save' : 'Download', className: 'ck-btn' })
-                                ]
-                            });
-                            if (result.button.label === 'Cancel') {
-                                return;
-                            }
-                            if (result.button.label === 'Save') {
-                                await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
-                            }
-                        }
-                    }
+                    if (!await promptIfDirty())
+                        return;
                     flushVfsCaches();
                     _ckIntentionalNav = true;
                     tracker.forEach(w => { w.context.model.dirty = false; });
@@ -1555,14 +1436,10 @@ const notebookPlugin = {
             }
         };
         commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveToFile, {
-            label: 'Save as…',
+            label: 'Save as file…',
             execute: async () => {
                 const panel = tracker.currentWidget;
                 if (!panel) {
-                    return;
-                }
-                if (!fsaSupported) {
-                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.downloadNotebookCommand);
                     return;
                 }
                 const content = panel.context.model.toJSON();
@@ -1596,74 +1473,9 @@ const notebookPlugin = {
         commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.closeNotebook, {
             label: 'Close notebook',
             execute: async () => {
-                var _a;
                 const panel = tracker.currentWidget;
-                if (fsaSupported && panel && panel.context.model.dirty) {
-                    const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                        title: 'Unsaved Notebook',
-                        body: `"${panel.context.path}" has unsaved changes.`,
-                        buttons: [
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                            _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Save', className: 'ck-btn' })
-                        ]
-                    });
-                    if (result.button.label === 'Cancel')
-                        return;
-                    if (result.button.accept) {
-                        await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
-                    }
-                }
-                if (!fsaSupported && panel) {
-                    const _lastDl = sessionStorage.getItem(`ck-last-downloaded:${panel.context.path}`);
-                    const _currentCells = JSON.stringify((_a = panel.context.model.toJSON().cells) !== null && _a !== void 0 ? _a : []);
-                    const _hasCache = sessionStorage.getItem(`vfs-cache:${panel.context.path}`) !== null;
-                    if (_lastDl === null ? _currentCells !== '[]' : _lastDl !== _currentCells) {
-                        if (!_hasCache) {
-                            const _ni = document.createElement('input');
-                            _ni.value = panel.context.path.replace(/\.ipynb$/i, '') || 'my-notebook';
-                            _ni.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
-                            const _nb = new _lumino_widgets__WEBPACK_IMPORTED_MODULE_7__.Widget();
-                            _nb.node.appendChild(_ni);
-                            const _r = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                                title: 'Name your new notebook',
-                                body: _nb,
-                                buttons: [
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Discard', className: 'ck-btn' }),
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Save to browser', className: 'ck-btn' })
-                                ]
-                            });
-                            if (_r.button.label === 'Cancel')
-                                return;
-                            if (_r.button.accept) {
-                                const _rn = _ni.value.trim() || 'my-notebook';
-                                const _fn = _rn.toLowerCase().endsWith('.ipynb') ? _rn : `${_rn}.ipynb`;
-                                try {
-                                    sessionStorage.setItem(`vfs-cache:${_fn}`, JSON.stringify(panel.context.model.toJSON()));
-                                }
-                                catch (_b) { }
-                                (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)({ label: _fn, type: 'vfs', path: _fn });
-                            }
-                        }
-                        else {
-                            const _rd = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({
-                                title: 'Close notebook',
-                                body: 'Download a copy to your device before closing? Your changes are saved in the browser.',
-                                buttons: [
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Close', className: 'ck-btn' }),
-                                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Download', className: 'ck-btn' })
-                                ]
-                            });
-                            if (_rd.button.label === 'Cancel')
-                                return;
-                            if (_rd.button.accept) {
-                                await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.downloadNotebookCommand);
-                            }
-                        }
-                    }
-                }
+                if (!await promptIfDirty())
+                    return;
                 const handle = (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.getCurrentFileHandle)();
                 if (handle) {
                     (0,_recents__WEBPACK_IMPORTED_MODULE_16__.removeRecentNotebook)({ label: handle.name });
@@ -2757,7 +2569,7 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
         if (!commands.hasCommand(commandSaveChanges)) {
             commands.addCommand(commandSaveChanges, {
                 label: canSaveToFile ? 'Save changes' : 'Save changes in browser…',
-                isEnabled: () => canSaveToFile ? isSaveChangesEnabled() : true,
+                isEnabled: () => isSaveChangesEnabled(),
                 execute: () => {
                     saveChanges();
                 }
@@ -2765,7 +2577,7 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
         }
         if (!commands.hasCommand(commandSaveAs)) {
             commands.addCommand(commandSaveAs, {
-                label: 'Save as…',
+                label: 'Save as file…',
                 isVisible: () => canSaveToFile,
                 execute: () => {
                     saveAs();
@@ -3099,4 +2911,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.fa45485f484a11fd82a4.js.map
+//# sourceMappingURL=lib_index_js.2ecbbf56d9ccf0fd36d1.js.map

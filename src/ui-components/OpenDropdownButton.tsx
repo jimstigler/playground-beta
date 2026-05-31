@@ -103,7 +103,7 @@ export class OpenDropdownButton extends ToolbarButton {
     if (!commands.hasCommand(commandSaveChanges)) {
       commands.addCommand(commandSaveChanges, {
         label: canSaveToFile ? 'Save changes' : 'Save changes in browser…',
-        isEnabled: () => canSaveToFile ? isSaveChangesEnabled() : true,
+        isEnabled: () => isSaveChangesEnabled(),
         execute: () => {
           saveChanges();
         }
@@ -112,7 +112,7 @@ export class OpenDropdownButton extends ToolbarButton {
 
     if (!commands.hasCommand(commandSaveAs)) {
       commands.addCommand(commandSaveAs, {
-        label: 'Save as…',
+        label: 'Save as file…',
         isVisible: () => canSaveToFile,
         execute: () => {
           saveAs();

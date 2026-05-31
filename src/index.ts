@@ -170,39 +170,48 @@ const plugin: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        // Safari/Firefox — save to browser VFS with a user-chosen name
-        const suggestedName =
-          panel.context.path && panel.context.path !== 'Untitled.ipynb'
-            ? panel.context.path.replace(/\.ipynb$/i, '')
-            : generateDefaultNotebookName();
+        // Safari/Firefox — save to browser VFS.
+        // Untitled notebooks get a name dialog first; all others save silently.
+        const isUntitled = !panel.context.path || panel.context.path === 'Untitled.ipynb';
 
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = suggestedName;
-        input.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
+        let targetName = panel.context.path;
 
-        const body = new Widget();
-        body.node.appendChild(input);
-
-        const result = await showDialog({
-          title: 'Save changes in browser',
-          body,
-          buttons: [
-            Dialog.cancelButton({ className: 'ck-btn' }),
-            Dialog.okButton({ label: 'Save', className: 'ck-btn' })
-          ]
-        });
-
-        if (!result.button.accept) {
-          return;
+        if (isUntitled) {
+          const suggestedName = generateDefaultNotebookName();
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = suggestedName;
+          input.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
+          const body = new Widget();
+          body.node.appendChild(input);
+          const result = await showDialog({
+            title: 'Save in browser',
+            body,
+            buttons: [
+              Dialog.cancelButton({ className: 'ck-btn' }),
+              Dialog.okButton({ label: 'Save', className: 'ck-btn' })
+            ]
+          });
+          if (!result.button.accept) return;
+          const entered = input.value.trim() || suggestedName;
+          targetName = entered.toLowerCase().endsWith('.ipynb') ? entered : `${entered}.ipynb`;
         }
 
-        const newName = (input.value.trim() || suggestedName) + '.ipynb';
         try {
-          if (newName !== panel.context.path) {
-            await panel.context.rename(newName);
+          if (targetName !== panel.context.path) {
+            await panel.context.rename(targetName);
           }
           await panel.context.save();
+          // Keep the VFS session cache in sync so recents can reopen this notebook
+          try {
+            sessionStorage.setItem(
+              `vfs-cache:${panel.context.path}`,
+              JSON.stringify(panel.context.model.toJSON())
+            );
+          } catch { /* ignore quota errors */ }
+          // Ensure this notebook appears in recents as a VFS entry
+          const { addRecentNotebook } = await import('./recents');
+          addRecentNotebook({ label: panel.context.path, type: 'vfs', path: panel.context.path });
           showSavedToast();
         } catch (err) {
           console.error('Failed to save to browser:', err);
