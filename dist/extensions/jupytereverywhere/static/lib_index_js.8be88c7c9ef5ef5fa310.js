@@ -1869,7 +1869,7 @@ const notebookPlugin = {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.copyShareLink);
         }, () => { var _a; return notebookSourceUrl !== null && !((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveNotebookCommand);
-        }, () => { var _a; return !!((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => {
+        }, () => { var _a; return !!((_a = tracker.currentWidget) === null || _a === void 0 ? void 0 : _a.context.model.dirty); }, () => (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.getCurrentFileHandle)() === null, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveToFile);
         }, () => {
             void commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.closeNotebook);
@@ -2647,7 +2647,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.ToolbarButton {
-    constructor(commands, openFromFile, openFromURL, openNewRNotebook, openNewPythonNotebook, downloadNotebook, downloadPDF, openFromGitHub, copyShareLink, isCopyShareLinkEnabled, saveChanges, isSaveChangesEnabled, saveAs, closeNotebook, clearStorage, getRecentItems) {
+    constructor(commands, openFromFile, openFromURL, openNewRNotebook, openNewPythonNotebook, downloadNotebook, downloadPDF, openFromGitHub, copyShareLink, isCopyShareLinkEnabled, saveChanges, isSaveChangesEnabled, isDownloadVisible, saveAs, closeNotebook, clearStorage, getRecentItems) {
         const commandOpenFile = 'jupytereverywhere:file-open-from-file';
         const commandOpenUrl = 'jupytereverywhere:file-open-from-url';
         const commandNewR = 'jupytereverywhere:file-new-r-notebook';
@@ -2695,7 +2695,7 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
         if (!commands.hasCommand(commandDownload)) {
             commands.addCommand(commandDownload, {
                 label: 'Download notebook',
-                isVisible: () => !isSaveChangesEnabled(),
+                isVisible: () => isDownloadVisible(),
                 execute: () => {
                     downloadNotebook();
                 }
@@ -3061,4 +3061,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.9d16b90a67cdbe09baef.js.map
+//# sourceMappingURL=lib_index_js.8be88c7c9ef5ef5fa310.js.map

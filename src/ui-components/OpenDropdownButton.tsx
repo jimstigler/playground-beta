@@ -16,6 +16,7 @@ export class OpenDropdownButton extends ToolbarButton {
     isCopyShareLinkEnabled: () => boolean,
     saveChanges: () => void,
     isSaveChangesEnabled: () => boolean,
+    isDownloadVisible: () => boolean,
     saveAs: () => void,
     closeNotebook: () => void,
     clearStorage: () => void,
@@ -73,7 +74,7 @@ export class OpenDropdownButton extends ToolbarButton {
     if (!commands.hasCommand(commandDownload)) {
       commands.addCommand(commandDownload, {
         label: 'Download notebook',
-        isVisible: () => !isSaveChangesEnabled(),
+        isVisible: () => isDownloadVisible(),
         execute: () => {
           downloadNotebook();
         }
