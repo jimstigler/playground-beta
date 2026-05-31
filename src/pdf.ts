@@ -186,7 +186,7 @@ window.MathJax = {
   }
 };
 </script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>`;
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -202,7 +202,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,san
 .output{margin:.4em 0}
 pre{font-family:"SFMono-Regular",Consolas,monospace;font-size:.875em;white-space:pre-wrap;word-break:break-word}
 .stream.stderr,.error{color:#c0392b}
-img,svg{max-width:100%;height:auto;display:block}
+img{max-width:100%;height:auto;display:block}.output svg{max-width:100%;height:auto;display:block}
 table{border-collapse:collapse;width:100%;margin:.5em 0;font-size:.9em}
 th,td{border:1px solid #ccc;padding:5px 9px;text-align:left;vertical-align:top}
 th{background:#f0f0f0;font-weight:600}
@@ -224,7 +224,7 @@ a{color:#0366d6}
   body{max-width:none;padding:0;margin:0}
   .cell{break-inside:avoid;page-break-inside:avoid}
   h1,h2,h3,h4,h5,h6{break-after:avoid;page-break-after:avoid}
-  img,svg{break-inside:avoid;max-width:100%!important}
+  img,.output svg{break-inside:avoid;max-width:100%!important}
   table{break-inside:avoid}
   pre{white-space:pre-wrap;overflow:visible}
 }
