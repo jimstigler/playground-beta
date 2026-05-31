@@ -552,8 +552,44 @@ const plugin = {
                     }
                     return;
                 }
-                // No file handle yet — fall through to Save as… (new notebook or GitHub notebook)
-                await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_7__.Commands.saveToFile);
+                if ((0,_filesystem__WEBPACK_IMPORTED_MODULE_9__.isFileSystemAccessSupported)()) {
+                    // Chrome/Edge without a file handle yet — show file picker
+                    await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_7__.Commands.saveToFile);
+                    return;
+                }
+                // Safari/Firefox — save to browser VFS with a user-chosen name
+                const suggestedName = panel.context.path && panel.context.path !== 'Untitled.ipynb'
+                    ? panel.context.path.replace(/\.ipynb$/i, '')
+                    : (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_10__.generateDefaultNotebookName)();
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = suggestedName;
+                input.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
+                const body = new _lumino_widgets__WEBPACK_IMPORTED_MODULE_2__.Widget();
+                body.node.appendChild(input);
+                const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.showDialog)({
+                    title: 'Save changes in browser',
+                    body,
+                    buttons: [
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.cancelButton({ className: 'ck-btn' }),
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.okButton({ label: 'Save', className: 'ck-btn' })
+                    ]
+                });
+                if (!result.button.accept) {
+                    return;
+                }
+                const newName = (input.value.trim() || suggestedName) + '.ipynb';
+                try {
+                    if (newName !== panel.context.path) {
+                        await panel.context.rename(newName);
+                    }
+                    await panel.context.save();
+                    (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_10__.showSavedToast)();
+                }
+                catch (err) {
+                    console.error('Failed to save to browser:', err);
+                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.warning('Could not save to browser.', { autoClose: 4000 });
+                }
             }
         });
         app.commands.addKeyBinding({
@@ -2720,8 +2756,8 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
         }
         if (!commands.hasCommand(commandSaveChanges)) {
             commands.addCommand(commandSaveChanges, {
-                label: 'Save changes',
-                isEnabled: () => isSaveChangesEnabled(),
+                label: canSaveToFile ? 'Save changes' : 'Save changes in browser…',
+                isEnabled: () => canSaveToFile ? isSaveChangesEnabled() : true,
                 execute: () => {
                     saveChanges();
                 }
@@ -3063,4 +3099,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.c2abf530aa86fe5ce606.js.map
+//# sourceMappingURL=lib_index_js.fa45485f484a11fd82a4.js.map

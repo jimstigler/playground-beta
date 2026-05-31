@@ -152,7 +152,7 @@
     "outputDir": "jupytereverywhere/labextension",
     "schemaDir": "schema",
     "_build": {
-      "load": "static/remoteEntry.e9dca770e5c2c7da71e3.js",
+      "load": "static/remoteEntry.f1d015edff6d50a9c1a0.js",
       "extension": "./extension",
       "style": "./style"
     }

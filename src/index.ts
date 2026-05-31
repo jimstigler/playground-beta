@@ -10,7 +10,7 @@ import routesPlugin from './routes';
 import notFoundPlugin from './pages/not-found';
 import { Commands } from './commands';
 import { notebookPlugin } from './pages/notebook';
-import { getCurrentFileHandle, saveToHandle } from './filesystem';
+import { getCurrentFileHandle, saveToHandle, isFileSystemAccessSupported } from './filesystem';
 import { generateDefaultNotebookName, showSavedToast } from './notebook-utils';
 
 import { KERNEL_DISPLAY_NAMES, switchKernel } from './kernels';
@@ -164,8 +164,50 @@ const plugin: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        // No file handle yet — fall through to Save as… (new notebook or GitHub notebook)
-        await commands.execute(Commands.saveToFile);
+        if (isFileSystemAccessSupported()) {
+          // Chrome/Edge without a file handle yet — show file picker
+          await commands.execute(Commands.saveToFile);
+          return;
+        }
+
+        // Safari/Firefox — save to browser VFS with a user-chosen name
+        const suggestedName =
+          panel.context.path && panel.context.path !== 'Untitled.ipynb'
+            ? panel.context.path.replace(/\.ipynb$/i, '')
+            : generateDefaultNotebookName();
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = suggestedName;
+        input.style.cssText = 'width:100%;box-sizing:border-box;padding:8px';
+
+        const body = new Widget();
+        body.node.appendChild(input);
+
+        const result = await showDialog({
+          title: 'Save changes in browser',
+          body,
+          buttons: [
+            Dialog.cancelButton({ className: 'ck-btn' }),
+            Dialog.okButton({ label: 'Save', className: 'ck-btn' })
+          ]
+        });
+
+        if (!result.button.accept) {
+          return;
+        }
+
+        const newName = (input.value.trim() || suggestedName) + '.ipynb';
+        try {
+          if (newName !== panel.context.path) {
+            await panel.context.rename(newName);
+          }
+          await panel.context.save();
+          showSavedToast();
+        } catch (err) {
+          console.error('Failed to save to browser:', err);
+          Notification.warning('Could not save to browser.', { autoClose: 4000 });
+        }
       }
     });
 

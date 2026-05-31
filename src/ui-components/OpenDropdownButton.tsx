@@ -102,8 +102,8 @@ export class OpenDropdownButton extends ToolbarButton {
 
     if (!commands.hasCommand(commandSaveChanges)) {
       commands.addCommand(commandSaveChanges, {
-        label: 'Save changes',
-        isEnabled: () => isSaveChangesEnabled(),
+        label: canSaveToFile ? 'Save changes' : 'Save changes in browser…',
+        isEnabled: () => canSaveToFile ? isSaveChangesEnabled() : true,
         execute: () => {
           saveChanges();
         }
