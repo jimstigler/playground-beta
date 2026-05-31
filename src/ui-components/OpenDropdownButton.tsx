@@ -73,6 +73,7 @@ export class OpenDropdownButton extends ToolbarButton {
     if (!commands.hasCommand(commandDownload)) {
       commands.addCommand(commandDownload, {
         label: 'Download notebook',
+        isVisible: () => !isSaveChangesEnabled(),
         execute: () => {
           downloadNotebook();
         }

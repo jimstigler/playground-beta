@@ -2695,6 +2695,7 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
         if (!commands.hasCommand(commandDownload)) {
             commands.addCommand(commandDownload, {
                 label: 'Download notebook',
+                isVisible: () => !isSaveChangesEnabled(),
                 execute: () => {
                     downloadNotebook();
                 }
@@ -3060,4 +3061,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.34cd42cf6f7f2dba2739.js.map
+//# sourceMappingURL=lib_index_js.9d16b90a67cdbe09baef.js.map
