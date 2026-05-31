@@ -1,6 +1,7 @@
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
 import { ToolbarButton } from '@jupyterlab/apputils';
+import { getCurrentFileHandle } from '../filesystem';
 
 export class OpenDropdownButton extends ToolbarButton {
   constructor(
@@ -112,7 +113,7 @@ export class OpenDropdownButton extends ToolbarButton {
 
     if (!commands.hasCommand(commandSaveAs)) {
       commands.addCommand(commandSaveAs, {
-        label: 'Save as file…',
+        label: () => getCurrentFileHandle() !== null ? 'Save as…' : 'Save as file…',
         isVisible: () => canSaveToFile,
         execute: () => {
           saveAs();

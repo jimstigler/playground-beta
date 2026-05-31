@@ -2492,6 +2492,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _lumino_widgets__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_lumino_widgets__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jupyterlab/apputils */ "webpack/sharing/consume/default/@jupyterlab/apputils");
 /* harmony import */ var _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _filesystem__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../filesystem */ "./lib/filesystem.js");
+
 
 
 class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.ToolbarButton {
@@ -2577,7 +2579,7 @@ class OpenDropdownButton extends _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1
         }
         if (!commands.hasCommand(commandSaveAs)) {
             commands.addCommand(commandSaveAs, {
-                label: 'Save as file…',
+                label: () => (0,_filesystem__WEBPACK_IMPORTED_MODULE_2__.getCurrentFileHandle)() !== null ? 'Save as…' : 'Save as file…',
                 isVisible: () => canSaveToFile,
                 execute: () => {
                     saveAs();
@@ -2911,4 +2913,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.2ecbbf56d9ccf0fd36d1.js.map
+//# sourceMappingURL=lib_index_js.16e17e23632e7d00b877.js.map
