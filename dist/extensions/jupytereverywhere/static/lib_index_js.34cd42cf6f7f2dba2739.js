@@ -2111,10 +2111,11 @@ a{color:#0366d6}
 @page{size:letter portrait;margin:.75in}
 @media print{
   body{max-width:none;padding:0;margin:0}
-  .cell{break-inside:avoid;page-break-inside:avoid}
   h1,h2,h3,h4,h5,h6{break-after:avoid;page-break-after:avoid}
-  img,.output svg{break-inside:avoid;max-width:100%!important}
-  table{break-inside:avoid}
+  .code-src{break-inside:avoid;page-break-inside:avoid}
+  img,.output svg{break-inside:avoid;page-break-inside:avoid;max-width:100%!important}
+  table{break-inside:avoid;page-break-inside:avoid}
+  tr{break-inside:avoid;page-break-inside:avoid}
   pre{white-space:pre-wrap;overflow:visible}
 }
 </style>
@@ -3059,4 +3060,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.7e212631763c32a80287.js.map
+//# sourceMappingURL=lib_index_js.34cd42cf6f7f2dba2739.js.map
