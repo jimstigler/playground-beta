@@ -1061,7 +1061,6 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
             void commands.execute(Commands.saveNotebookCommand);
           },
           () => !!tracker.currentWidget?.context.model.dirty,
-          () => getCurrentFileHandle() === null,
           () => {
             void commands.execute(Commands.saveToFile);
           },

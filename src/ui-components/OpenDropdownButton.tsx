@@ -16,12 +16,13 @@ export class OpenDropdownButton extends ToolbarButton {
     isCopyShareLinkEnabled: () => boolean,
     saveChanges: () => void,
     isSaveChangesEnabled: () => boolean,
-    isDownloadVisible: () => boolean,
     saveAs: () => void,
     closeNotebook: () => void,
     clearStorage: () => void,
     getRecentItems: () => Array<{ label: string; open: () => void; isCurrent: () => boolean }>
   ) {
+    const canSaveToFile = typeof (window as any).showSaveFilePicker === 'function';
+
     const commandOpenFile = 'jupytereverywhere:file-open-from-file';
     const commandOpenUrl = 'jupytereverywhere:file-open-from-url';
     const commandNewR = 'jupytereverywhere:file-new-r-notebook';
@@ -74,7 +75,7 @@ export class OpenDropdownButton extends ToolbarButton {
     if (!commands.hasCommand(commandDownload)) {
       commands.addCommand(commandDownload, {
         label: 'Download notebook',
-        isVisible: () => isDownloadVisible(),
+        isVisible: () => !canSaveToFile,
         execute: () => {
           downloadNotebook();
         }
@@ -112,6 +113,7 @@ export class OpenDropdownButton extends ToolbarButton {
     if (!commands.hasCommand(commandSaveAs)) {
       commands.addCommand(commandSaveAs, {
         label: 'Save as…',
+        isVisible: () => canSaveToFile,
         execute: () => {
           saveAs();
         }
