@@ -2054,6 +2054,7 @@ function buildHtml(title, nbJson) {
 var _printed = false;
 function _doPrint() { if (!_printed) { _printed = true; window.print(); } }
 setTimeout(_doPrint, 6000);
+window.addEventListener('afterprint', function() { window.close(); });
 
 window.MathJax = {
   tex: {
@@ -3058,4 +3059,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.446bc3039207e4c07042.js.map
+//# sourceMappingURL=lib_index_js.7e212631763c32a80287.js.map

@@ -165,6 +165,7 @@ function buildHtml(title: string, nbJson: nbformat.INotebookContent): string {
 var _printed = false;
 function _doPrint() { if (!_printed) { _printed = true; window.print(); } }
 setTimeout(_doPrint, 6000);
+window.addEventListener('afterprint', function() { window.close(); });
 
 window.MathJax = {
   tex: {
