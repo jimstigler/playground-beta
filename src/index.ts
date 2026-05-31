@@ -102,41 +102,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        const suggestedName =
-          panel.context.path && panel.context.path !== 'Untitled.ipynb'
-            ? panel.context.path.replace(/\.ipynb$/i, '')
-            : generateDefaultNotebookName();
-
-        const input = document.createElement('input');
-        input.value = suggestedName;
-        input.style.width = '100%';
-        input.style.boxSizing = 'border-box';
-        input.style.padding = '8px';
-
-        const body = new Widget();
-        body.node.appendChild(input);
-
-        const result = await showDialog({
-          title: 'Download PDF as…',
-          body,
-          buttons: [Dialog.cancelButton({ className: 'ck-btn' }), Dialog.okButton({ label: 'Download', className: 'ck-btn' })]
-        });
-
-        if (!result.button.accept) {
-          return;
-        }
-
-        const rawName = input.value.trim() || suggestedName;
-
         try {
-          await exportNotebookAsPDF(panel, rawName);
+          await exportNotebookAsPDF(panel);
         } catch (error) {
           console.error('Failed to export notebook as PDF:', error);
-          await showDialog({
-            title: 'Error exporting PDF',
-            body: 'An error occurred while exporting the notebook as a PDF.',
-            buttons: [Dialog.okButton()]
-          });
         }
       }
     });

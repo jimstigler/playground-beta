@@ -493,35 +493,11 @@ const plugin = {
                     console.warn('No active notebook to download as PDF');
                     return;
                 }
-                const suggestedName = panel.context.path && panel.context.path !== 'Untitled.ipynb'
-                    ? panel.context.path.replace(/\.ipynb$/i, '')
-                    : (0,_notebook_utils__WEBPACK_IMPORTED_MODULE_10__.generateDefaultNotebookName)();
-                const input = document.createElement('input');
-                input.value = suggestedName;
-                input.style.width = '100%';
-                input.style.boxSizing = 'border-box';
-                input.style.padding = '8px';
-                const body = new _lumino_widgets__WEBPACK_IMPORTED_MODULE_2__.Widget();
-                body.node.appendChild(input);
-                const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.showDialog)({
-                    title: 'Download PDF as…',
-                    body,
-                    buttons: [_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.cancelButton({ className: 'ck-btn' }), _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.okButton({ label: 'Download', className: 'ck-btn' })]
-                });
-                if (!result.button.accept) {
-                    return;
-                }
-                const rawName = input.value.trim() || suggestedName;
                 try {
-                    await (0,_pdf__WEBPACK_IMPORTED_MODULE_4__.exportNotebookAsPDF)(panel, rawName);
+                    await (0,_pdf__WEBPACK_IMPORTED_MODULE_4__.exportNotebookAsPDF)(panel);
                 }
                 catch (error) {
                     console.error('Failed to export notebook as PDF:', error);
-                    await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.showDialog)({
-                        title: 'Error exporting PDF',
-                        body: 'An error occurred while exporting the notebook as a PDF.',
-                        buttons: [_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Dialog.okButton()]
-                    });
                 }
             }
         });
@@ -3082,4 +3058,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.1b26f0bec3cef0b55543.js.map
+//# sourceMappingURL=lib_index_js.446bc3039207e4c07042.js.map
