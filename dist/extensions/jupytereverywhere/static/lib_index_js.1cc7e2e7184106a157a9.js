@@ -1720,14 +1720,14 @@ const notebookPlugin = {
             });
         });
         tracker.widgetAdded.connect(async (_, panel) => {
-            var _a;
+            var _a, _b;
             console.log('[widgetAdded]', panel.context.path, 'dirty=', panel.context.model.dirty);
             // Kernel init (xr in particular) fires spurious dirty events and also
             // updates notebook metadata (kernelspec, language_info) which changes the
             // full toJSON() output. Compare cells only so metadata updates don't
             // look like real user edits.
             await panel.context.ready;
-            const _initialCells = JSON.stringify((_a = panel.context.model.toJSON().cells) !== null && _a !== void 0 ? _a : []);
+            let _initialCells = JSON.stringify((_a = panel.context.model.toJSON().cells) !== null && _a !== void 0 ? _a : []);
             panel.context.model.dirty = false;
             panel.context.model.stateChanged.connect(() => {
                 var _a;
@@ -1740,6 +1740,11 @@ const notebookPlugin = {
                 }
             });
             await panel.sessionContext.ready;
+            // Re-baseline after kernel init: the kernel may modify cells (clear execution
+            // counts, add ids, etc.) between context.ready and sessionContext.ready, causing
+            // the stateChanged guard to miss spurious dirty events. Re-snapshot and clear.
+            _initialCells = JSON.stringify((_b = panel.context.model.toJSON().cells) !== null && _b !== void 0 ? _b : []);
+            panel.context.model.dirty = false;
             const url = new URL(window.location.href);
             if (url.searchParams.has('kernel')) {
                 url.searchParams.delete('kernel');
@@ -3036,4 +3041,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.b24d14bcf09b50e6fcff.js.map
+//# sourceMappingURL=lib_index_js.1cc7e2e7184106a157a9.js.map
