@@ -402,12 +402,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _pages_notebook__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./pages/notebook */ "./lib/pages/notebook.js");
 /* harmony import */ var _filesystem__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./filesystem */ "./lib/filesystem.js");
 /* harmony import */ var _notebook_utils__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./notebook-utils */ "./lib/notebook-utils.js");
-/* harmony import */ var _kernels__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./kernels */ "./lib/kernels.js");
-/* harmony import */ var _single_mode__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./single-mode */ "./lib/single-mode.js");
-/* harmony import */ var _notebook_factory__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./notebook-factory */ "./lib/notebook-factory.js");
-/* harmony import */ var _placeholders__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./placeholders */ "./lib/placeholders.js");
-/* harmony import */ var _icons__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./icons */ "./lib/icons.js");
-/* harmony import */ var _dialogs__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./dialogs */ "./lib/dialogs.js");
+/* harmony import */ var _recents__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./recents */ "./lib/recents.js");
+/* harmony import */ var _kernels__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./kernels */ "./lib/kernels.js");
+/* harmony import */ var _single_mode__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./single-mode */ "./lib/single-mode.js");
+/* harmony import */ var _notebook_factory__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./notebook-factory */ "./lib/notebook-factory.js");
+/* harmony import */ var _placeholders__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./placeholders */ "./lib/placeholders.js");
+/* harmony import */ var _icons__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./icons */ "./lib/icons.js");
+/* harmony import */ var _dialogs__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./dialogs */ "./lib/dialogs.js");
+
 
 
 
@@ -503,7 +505,7 @@ const plugin = {
         });
         commands.addCommand(_commands__WEBPACK_IMPORTED_MODULE_7__.Commands.restartMemoryAndRunAllCommand, {
             label: 'Restart Notebook Memory and Run All Cells',
-            icon: _icons__WEBPACK_IMPORTED_MODULE_15__.EverywhereIcons.fastForward,
+            icon: _icons__WEBPACK_IMPORTED_MODULE_16__.EverywhereIcons.fastForward,
             isEnabled: () => !!tracker.currentWidget,
             execute: async () => {
                 const panel = tracker.currentWidget;
@@ -582,6 +584,15 @@ const plugin = {
                     const entered = input.value.trim() || suggestedName;
                     targetName = entered.toLowerCase().endsWith('.ipynb') ? entered : `${entered}.ipynb`;
                 }
+                // Evict oldest VFS notebooks beyond limit before saving
+                const evicted = (0,_recents__WEBPACK_IMPORTED_MODULE_11__.enforceVfsLimit)(panel.context.path);
+                for (const e of evicted) {
+                    try {
+                        await app.serviceManager.contents.delete(e.path);
+                    }
+                    catch ( /* ignore */_a) { /* ignore */ }
+                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.info(`Removed "${e.label}" from browser storage to make room.`, { autoClose: 3000 });
+                }
                 try {
                     if (targetName !== panel.context.path) {
                         await panel.context.rename(targetName);
@@ -591,7 +602,7 @@ const plugin = {
                     try {
                         sessionStorage.setItem(`vfs-cache:${panel.context.path}`, JSON.stringify(panel.context.model.toJSON()));
                     }
-                    catch ( /* ignore quota errors */_a) { /* ignore quota errors */ }
+                    catch ( /* ignore quota errors */_b) { /* ignore quota errors */ }
                     // Ensure this notebook appears in recents as a VFS entry
                     const { addRecentNotebook } = await Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./recents */ "./lib/recents.js"));
                     addRecentNotebook({ label: panel.context.path, type: 'vfs', path: panel.context.path });
@@ -599,7 +610,13 @@ const plugin = {
                 }
                 catch (err) {
                     console.error('Failed to save to browser:', err);
-                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.warning('Could not save to browser.', { autoClose: 4000 });
+                    const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
+                    if (isQuota) {
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.error('Browser storage is full. Try File → Clear storage, or use “Save as file” to save to disk.', { autoClose: 8000 });
+                    }
+                    else {
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.warning('Could not save to browser.', { autoClose: 4000 });
+                    }
                 }
             }
         });
@@ -612,7 +629,7 @@ const plugin = {
             label: args => {
                 const kernel = args['kernel'] || '';
                 const isActive = args['isActive'];
-                const display = _kernels__WEBPACK_IMPORTED_MODULE_11__.KERNEL_DISPLAY_NAMES[kernel] || kernel;
+                const display = _kernels__WEBPACK_IMPORTED_MODULE_12__.KERNEL_DISPLAY_NAMES[kernel] || kernel;
                 if (isActive) {
                     return display;
                 }
@@ -632,11 +649,11 @@ const plugin = {
                 }
                 const currentKernel = ((_b = (_a = panel.sessionContext.session) === null || _a === void 0 ? void 0 : _a.kernel) === null || _b === void 0 ? void 0 : _b.name) || '';
                 if (currentKernel !== kernel) {
-                    const currentKernelDisplay = _kernels__WEBPACK_IMPORTED_MODULE_11__.KERNEL_DISPLAY_NAMES[currentKernel] || currentKernel;
-                    const targetKernelDisplay = _kernels__WEBPACK_IMPORTED_MODULE_11__.KERNEL_DISPLAY_NAMES[kernel] || kernel;
+                    const currentKernelDisplay = _kernels__WEBPACK_IMPORTED_MODULE_12__.KERNEL_DISPLAY_NAMES[currentKernel] || currentKernel;
+                    const targetKernelDisplay = _kernels__WEBPACK_IMPORTED_MODULE_12__.KERNEL_DISPLAY_NAMES[kernel] || kernel;
                     _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.warning(`You are about to switch your notebook coding language from ${currentKernelDisplay} to ${targetKernelDisplay}. Your previously created code will not run as intended.`, { autoClose: 5000 });
                 }
-                await (0,_kernels__WEBPACK_IMPORTED_MODULE_11__.switchKernel)(panel, kernel);
+                await (0,_kernels__WEBPACK_IMPORTED_MODULE_12__.switchKernel)(panel, kernel);
             }
         });
     }
@@ -652,13 +669,13 @@ const stateDBShim = {
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ([
     stateDBShim,
-    _notebook_factory__WEBPACK_IMPORTED_MODULE_13__.notebookFactoryPlugin,
+    _notebook_factory__WEBPACK_IMPORTED_MODULE_14__.notebookFactoryPlugin,
     plugin,
     _pages_notebook__WEBPACK_IMPORTED_MODULE_8__.notebookPlugin,
     _routes__WEBPACK_IMPORTED_MODULE_5__["default"],
-    _single_mode__WEBPACK_IMPORTED_MODULE_12__.singleDocumentMode,
-    _placeholders__WEBPACK_IMPORTED_MODULE_14__.placeholderPlugin,
-    _dialogs__WEBPACK_IMPORTED_MODULE_16__.sessionDialogs,
+    _single_mode__WEBPACK_IMPORTED_MODULE_13__.singleDocumentMode,
+    _placeholders__WEBPACK_IMPORTED_MODULE_15__.placeholderPlugin,
+    _dialogs__WEBPACK_IMPORTED_MODULE_17__.sessionDialogs,
     _pages_not_found__WEBPACK_IMPORTED_MODULE_6__["default"]
 ]);
 
@@ -1312,8 +1329,17 @@ const notebookPlugin = {
                 return;
             }
             const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
-            localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
-            localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
+            try {
+                localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
+                localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
+            }
+            catch (err) {
+                const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
+                _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Notification.error(isQuota
+                    ? 'Browser storage is full. Try File → Clear storage to free space.'
+                    : 'Could not stage notebook for opening.', { autoClose: 6000 });
+                return;
+            }
             await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.storeHandleForUpload)(uploadId, handle);
             const recentKey = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
             await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.storeRecentHandle)(recentKey, handle);
@@ -1351,9 +1377,18 @@ const notebookPlugin = {
                     return;
                 }
                 const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
-                localStorage.setItem(`uploaded-notebook:${uploadId}`, cached);
-                localStorage.setItem(`uploaded-notebook-name:${uploadId}`, nb.path);
-                localStorage.setItem(`uploaded-notebook-from-cache:${uploadId}`, '1');
+                try {
+                    localStorage.setItem(`uploaded-notebook:${uploadId}`, cached);
+                    localStorage.setItem(`uploaded-notebook-name:${uploadId}`, nb.path);
+                    localStorage.setItem(`uploaded-notebook-from-cache:${uploadId}`, '1');
+                }
+                catch (err) {
+                    const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
+                    _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Notification.error(isQuota
+                        ? 'Browser storage is full. Try File → Clear storage to free space.'
+                        : 'Could not stage notebook for opening.', { autoClose: 6000 });
+                    return;
+                }
                 (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)(nb);
                 if (!await promptIfDirty())
                     return;
@@ -1413,8 +1448,17 @@ const notebookPlugin = {
                     const diskFile = await handle.getFile();
                     const text = await diskFile.text();
                     const uploadId = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
-                    localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
-                    localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
+                    try {
+                        localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
+                        localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
+                    }
+                    catch (err) {
+                        const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Notification.error(isQuota
+                            ? 'Browser storage is full. Try File → Clear storage to free space.'
+                            : 'Could not stage notebook for opening.', { autoClose: 6000 });
+                        return;
+                    }
                     await (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.storeHandleForUpload)(uploadId, handle);
                     (0,_recents__WEBPACK_IMPORTED_MODULE_16__.addRecentNotebook)(nb);
                     const target = new URL(window.location.href);
@@ -1496,9 +1540,14 @@ const notebookPlugin = {
                         if (!_cachedNext)
                             continue; // stale entry — try next recent
                         const _uid = _lumino_coreutils__WEBPACK_IMPORTED_MODULE_9__.UUID.uuid4();
-                        localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
-                        localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
-                        localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
+                        try {
+                            localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
+                            localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
+                            localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
+                        }
+                        catch (_a) {
+                            continue; // storage full — skip this notebook, try next recent
+                        }
                         const _t = new URL(window.location.href);
                         _t.search = '';
                         _t.searchParams.set('uploaded-notebook', _uid);
@@ -2044,11 +2093,13 @@ const placeholderPlugin = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   addRecentNotebook: () => (/* binding */ addRecentNotebook),
+/* harmony export */   enforceVfsLimit: () => (/* binding */ enforceVfsLimit),
 /* harmony export */   getRecentNotebooks: () => (/* binding */ getRecentNotebooks),
 /* harmony export */   removeRecentNotebook: () => (/* binding */ removeRecentNotebook)
 /* harmony export */ });
 const RECENTS_KEY = 'jupytereverywhere:recent-notebooks';
 const MAX_RECENTS = 5;
+const VFS_NOTEBOOK_LIMIT = 10;
 function getRecentNotebooks() {
     var _a;
     try {
@@ -2065,6 +2116,37 @@ function addRecentNotebook(nb) {
 function removeRecentNotebook(nb) {
     const existing = getRecentNotebooks().filter(r => nb.url ? r.url !== nb.url : r.label !== nb.label);
     localStorage.setItem(RECENTS_KEY, JSON.stringify(existing));
+}
+// Evicts oldest VFS notebooks (by recents order) that are not currentPath until
+// the count is within VFS_NOTEBOOK_LIMIT. Returns evicted { label, path } pairs
+// so the caller can delete from the VFS contents manager and show toasts.
+function enforceVfsLimit(currentPath) {
+    const recents = getRecentNotebooks();
+    const vfsEntries = recents.filter(r => r.type === 'vfs');
+    if (vfsEntries.length <= VFS_NOTEBOOK_LIMIT)
+        return [];
+    const toEvict = vfsEntries.length - VFS_NOTEBOOK_LIMIT;
+    const evicted = [];
+    // Oldest entries are at the tail of the recents array
+    for (let i = recents.length - 1; i >= 0 && evicted.length < toEvict; i--) {
+        const nb = recents[i];
+        if (nb.type === 'vfs' && nb.path && nb.path !== currentPath) {
+            try {
+                sessionStorage.removeItem(`vfs-cache:${nb.path}`);
+            }
+            catch ( /* ignore */_a) { /* ignore */ }
+            evicted.push({ label: nb.label, path: nb.path });
+        }
+    }
+    if (evicted.length > 0) {
+        const evictedPaths = new Set(evicted.map(e => e.path));
+        const filtered = recents.filter(r => !(r.type === 'vfs' && r.path && evictedPaths.has(r.path)));
+        try {
+            localStorage.setItem(RECENTS_KEY, JSON.stringify(filtered));
+        }
+        catch ( /* ignore */_b) { /* ignore */ }
+    }
+    return evicted;
 }
 
 
@@ -2913,4 +2995,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.16e17e23632e7d00b877.js.map
+//# sourceMappingURL=lib_index_js.03493b4b850b2c3d9c64.js.map

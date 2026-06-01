@@ -12,6 +12,7 @@ import { Commands } from './commands';
 import { notebookPlugin } from './pages/notebook';
 import { getCurrentFileHandle, saveToHandle, isFileSystemAccessSupported } from './filesystem';
 import { generateDefaultNotebookName, showSavedToast } from './notebook-utils';
+import { enforceVfsLimit } from './recents';
 
 import { KERNEL_DISPLAY_NAMES, switchKernel } from './kernels';
 import { singleDocumentMode } from './single-mode';
@@ -197,6 +198,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
           targetName = entered.toLowerCase().endsWith('.ipynb') ? entered : `${entered}.ipynb`;
         }
 
+        // Evict oldest VFS notebooks beyond limit before saving
+        const evicted = enforceVfsLimit(panel.context.path);
+        for (const e of evicted) {
+          try { await app.serviceManager.contents.delete(e.path); } catch { /* ignore */ }
+          Notification.info(`Removed "${e.label}" from browser storage to make room.`, { autoClose: 3000 });
+        }
+
         try {
           if (targetName !== panel.context.path) {
             await panel.context.rename(targetName);
@@ -215,7 +223,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
           showSavedToast();
         } catch (err) {
           console.error('Failed to save to browser:', err);
-          Notification.warning('Could not save to browser.', { autoClose: 4000 });
+          const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
+          if (isQuota) {
+            Notification.error(
+              'Browser storage is full. Try File → Clear storage, or use “Save as file” to save to disk.',
+              { autoClose: 8000 }
+            );
+          } else {
+            Notification.warning('Could not save to browser.', { autoClose: 4000 });
+          }
         }
       }
     });

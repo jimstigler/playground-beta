@@ -423,8 +423,19 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
       }
 
       const uploadId = UUID.uuid4();
-      localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
-      localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
+      try {
+        localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
+        localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
+      } catch (err) {
+        const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
+        Notification.error(
+          isQuota
+            ? 'Browser storage is full. Try File → Clear storage to free space.'
+            : 'Could not stage notebook for opening.',
+          { autoClose: 6000 }
+        );
+        return;
+      }
       await storeHandleForUpload(uploadId, handle);
 
       const recentKey = UUID.uuid4();
@@ -467,9 +478,20 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
           return;
         }
         const uploadId = UUID.uuid4();
-        localStorage.setItem(`uploaded-notebook:${uploadId}`, cached);
-        localStorage.setItem(`uploaded-notebook-name:${uploadId}`, nb.path);
-        localStorage.setItem(`uploaded-notebook-from-cache:${uploadId}`, '1');
+        try {
+          localStorage.setItem(`uploaded-notebook:${uploadId}`, cached);
+          localStorage.setItem(`uploaded-notebook-name:${uploadId}`, nb.path);
+          localStorage.setItem(`uploaded-notebook-from-cache:${uploadId}`, '1');
+        } catch (err) {
+          const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
+          Notification.error(
+            isQuota
+              ? 'Browser storage is full. Try File → Clear storage to free space.'
+              : 'Could not stage notebook for opening.',
+            { autoClose: 6000 }
+          );
+          return;
+        }
         addRecentNotebook(nb);
         if (!await promptIfDirty()) return;
         const target = new URL(window.location.href);
@@ -535,8 +557,19 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
           const diskFile = await handle.getFile();
           const text = await diskFile.text();
           const uploadId = UUID.uuid4();
-          localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
-          localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
+          try {
+            localStorage.setItem(`uploaded-notebook:${uploadId}`, text);
+            localStorage.setItem(`uploaded-notebook-name:${uploadId}`, handle.name);
+          } catch (err) {
+            const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
+            Notification.error(
+              isQuota
+                ? 'Browser storage is full. Try File → Clear storage to free space.'
+                : 'Could not stage notebook for opening.',
+              { autoClose: 6000 }
+            );
+            return;
+          }
           await storeHandleForUpload(uploadId, handle);
           addRecentNotebook(nb);
 
@@ -624,9 +657,13 @@ export const notebookPlugin: JupyterFrontEndPlugin<void> = {
             const _cachedNext = sessionStorage.getItem(`vfs-cache:${_next.path}`);
             if (!_cachedNext) continue; // stale entry — try next recent
             const _uid = UUID.uuid4();
-            localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
-            localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
-            localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
+            try {
+              localStorage.setItem(`uploaded-notebook:${_uid}`, _cachedNext);
+              localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
+              localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
+            } catch {
+              continue; // storage full — skip this notebook, try next recent
+            }
             const _t = new URL(window.location.href);
             _t.search = '';
             _t.searchParams.set('uploaded-notebook', _uid);
