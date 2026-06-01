@@ -612,7 +612,10 @@ const plugin = {
                     console.error('Failed to save to browser:', err);
                     const isQuota = err instanceof DOMException && err.name === 'QuotaExceededError';
                     if (isQuota) {
-                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.error('Browser storage is full. Try File → Clear storage, or use “Save as file” to save to disk.', { autoClose: 8000 });
+                        const canSaveToFile = typeof window.showSaveFilePicker === 'function';
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.error(canSaveToFile
+                            ? 'Browser storage is full. Try File → Clear storage, or use “Save as file” to save to disk.'
+                            : 'Browser storage is full. Try File → Clear storage to free space.', { autoClose: 8000 });
                     }
                     else {
                         _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_1__.Notification.warning('Could not save to browser.', { autoClose: 4000 });
@@ -2995,4 +2998,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.03493b4b850b2c3d9c64.js.map
+//# sourceMappingURL=lib_index_js.b59c9d3936624110abd3.js.map
