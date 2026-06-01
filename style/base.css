@@ -407,7 +407,15 @@ jp-button[aria-label='Download'] svg {
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Hide the ReactiveToolbar popup opener ("...") — overflow is handled by
+   disabling the resizer in JS (notebook.tsx widgetAdded) and by making
+   the toolbar scrollable above as a safety net. */
+.jp-NotebookPanel-toolbar .jp-Toolbar-responsive-opener {
+  display: none !important;
 }
 
 .ck-logo-button {

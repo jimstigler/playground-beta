@@ -1722,6 +1722,42 @@ const notebookPlugin = {
         tracker.widgetAdded.connect(async (_, panel) => {
             var _a, _b;
             console.log('[widgetAdded]', panel.context.path, 'dirty=', panel.context.model.dirty);
+            // Disable ReactiveToolbar's overflow-to-popup behavior. The toolbar's
+            // _resizer is throttled at 500ms; using setTimeout(0) runs before it
+            // fires, so we can cancel it and install a no-op. Any items already
+            // moved to the popup (on a re-open) are moved back via dataset.jpItemName.
+            setTimeout(() => {
+                var _a, _b, _c;
+                if (panel.isDisposed)
+                    return;
+                const toolbar = panel.toolbar;
+                if (!toolbar)
+                    return;
+                if (toolbar._resizer) {
+                    toolbar._resizer.dispose();
+                }
+                toolbar._resizer = { invoke: () => Promise.resolve(), dispose: () => { } };
+                const opener = toolbar.popupOpener;
+                if (opener === null || opener === void 0 ? void 0 : opener.popup) {
+                    const popup = opener.popup;
+                    let count = popup.widgetCount();
+                    while (count > 0) {
+                        const widget = popup.widgetAt(0);
+                        if (!widget)
+                            break;
+                        const name = (_a = widget.node.dataset['jpItemName']) !== null && _a !== void 0 ? _a : '';
+                        if (name) {
+                            const pos = (_c = (_b = toolbar._widgetPositions) === null || _b === void 0 ? void 0 : _b.get(name)) !== null && _c !== void 0 ? _c : 0;
+                            toolbar.insertItem(pos, name, widget);
+                        }
+                        const next = popup.widgetCount();
+                        if (next >= count)
+                            break;
+                        count = next;
+                    }
+                    opener.hide();
+                }
+            }, 0);
             // Kernel init (xr in particular) fires spurious dirty events and also
             // updates notebook metadata (kernelspec, language_info) which changes the
             // full toJSON() output. Compare cells only so metadata updates don't
@@ -3041,4 +3077,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.1cc7e2e7184106a157a9.js.map
+//# sourceMappingURL=lib_index_js.ec3d8f4c409c2cadf6d1.js.map
