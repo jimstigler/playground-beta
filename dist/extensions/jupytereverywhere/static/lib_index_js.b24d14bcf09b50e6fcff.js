@@ -1521,11 +1521,49 @@ const notebookPlugin = {
             label: 'Close notebook',
             execute: async () => {
                 const panel = tracker.currentWidget;
-                if (!await promptIfDirty())
-                    return;
                 const handle = (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.getCurrentFileHandle)();
-                if (handle) {
-                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.removeRecentNotebook)({ label: handle.name });
+                const canSaveToFile = typeof window.showSaveFilePicker === 'function';
+                // VFS notebook: closing deletes it from browser storage, so we need a
+                // tailored prompt that warns about that and (on Chrome) offers Save as file.
+                const isVfs = !handle && notebookSourceUrl === null
+                    && !!panel && !!panel.context.path && panel.context.path !== 'Untitled.ipynb';
+                if (isVfs) {
+                    const isDirty = panel.context.model.dirty;
+                    const name = panel.context.path;
+                    const body = isDirty
+                        ? `"${name}" has unsaved changes. Closing will remove it from browser storage.`
+                        : `Closing "${name}" will remove it from browser storage.`;
+                    const buttons = [
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Cancel', className: 'ck-btn' }),
+                        _jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.cancelButton({ label: 'Close', className: 'ck-btn' }),
+                        ...(canSaveToFile ? [_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.Dialog.okButton({ label: 'Save as file', className: 'ck-btn' })] : [])
+                    ];
+                    const result = await (0,_jupyterlab_apputils__WEBPACK_IMPORTED_MODULE_6__.showDialog)({ title: 'Close notebook', body, buttons });
+                    if (result.button.label === 'Cancel' || (!result.button.accept && result.button.label !== 'Close'))
+                        return;
+                    if (result.button.label === 'Save as file') {
+                        await commands.execute(_commands__WEBPACK_IMPORTED_MODULE_12__.Commands.saveToFile);
+                        // If user cancelled the file picker, file handle is still null — abort close
+                        if (!(0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.getCurrentFileHandle)())
+                            return;
+                    }
+                    // Delete the notebook from VFS to free storage
+                    try {
+                        await serviceManager.contents.delete(panel.context.path);
+                    }
+                    catch ( /* ignore */_a) { /* ignore */ }
+                    try {
+                        sessionStorage.removeItem(`vfs-cache:${panel.context.path}`);
+                    }
+                    catch ( /* ignore */_b) { /* ignore */ }
+                }
+                else {
+                    if (!await promptIfDirty())
+                        return;
+                }
+                const currentHandle = (0,_filesystem__WEBPACK_IMPORTED_MODULE_15__.getCurrentFileHandle)();
+                if (currentHandle) {
+                    (0,_recents__WEBPACK_IMPORTED_MODULE_16__.removeRecentNotebook)({ label: currentHandle.name });
                 }
                 else if (notebookSourceUrl !== null) {
                     (0,_recents__WEBPACK_IMPORTED_MODULE_16__.removeRecentNotebook)({ url: notebookSourceUrl });
@@ -1548,7 +1586,7 @@ const notebookPlugin = {
                             localStorage.setItem(`uploaded-notebook-name:${_uid}`, _next.path);
                             localStorage.setItem(`uploaded-notebook-from-cache:${_uid}`, '1');
                         }
-                        catch (_a) {
+                        catch (_c) {
                             continue; // storage full — skip this notebook, try next recent
                         }
                         const _t = new URL(window.location.href);
@@ -2998,4 +3036,4 @@ module.exports = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"n
 /***/ }
 
 }]);
-//# sourceMappingURL=lib_index_js.b59c9d3936624110abd3.js.map
+//# sourceMappingURL=lib_index_js.b24d14bcf09b50e6fcff.js.map
